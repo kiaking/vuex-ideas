@@ -1,27 +1,19 @@
-import { ref, computed } from 'vue'
-import { createStore } from '../../src'
-import greeter from './greeter'
+import { createModule } from '../../src'
 
-const counter = createStore({
-  setup() {
-    const count = ref(1)
+interface State {
+  count: number
+}
 
-    const double = computed(() => {
-      const { greet } = greeter
-      console.log(greet)
-      return count.value * 2
-    })
-
-    function increment() {
-      const { greet } = greeter
-      console.log(greet)
-      count.value++
-    }
-
+const counter = createModule<State>({
+  state() {
     return {
-      count,
-      double,
-      increment
+      count: 1
+    }
+  },
+
+  actions: {
+    increment (state) {
+      state.count++
     }
   }
 })
