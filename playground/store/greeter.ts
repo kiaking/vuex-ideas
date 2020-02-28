@@ -1,20 +1,26 @@
-// import { computed } from 'vue'
-// import { createStore } from '../../src'
-// import counter from './counter'
+import { createModule } from '../../src'
+import counter from './counter'
 
-// const greeter = createStore({
-//   setup() {
-//     const greet = computed(() => `Hello the count is ${counter.count.value}`)
+const greeter = createModule({
+  name: 'greeter',
 
-//     function addGreeting (value: any) {
-//       return `Hello ${value}`
-//     }
+  use: () => ({ counter }),
 
-//     return {
-//       greet,
-//       addGreeting
-//     }
-//   }
-// })
+  state: () => ({
+    greet: 'Hello!'
+  }),
 
-// export default greeter
+  getters: {
+    fullGreet(): string {
+      return `${this.state.greet} Kia!`
+    }
+  },
+
+  actions: {
+    changeGreet(): void {
+      this.state.greet = 'YO!'
+    }
+  }
+})
+
+export default greeter
