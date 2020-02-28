@@ -7,7 +7,10 @@
     <button @click="increment">INCREMENT</button>
     <button @click="incrementDouble">INCREMENT DOUBLE</button>
 
+    <hr>
+
     <p>Greet: {{ greeterState.greet }}</p>
+    <button @click="changeGreet">CHANGE GREET MESSAGE</button>
   </div>
 </template>
 
@@ -31,7 +34,8 @@ export default {
       increment: counter.increment,
       incrementDouble: counter.incrementDouble,
 
-      greeterState: greeter.state
+      greeterState: greeter.state,
+      changeGreet: greeter.changeGreet
     }
   }
 }

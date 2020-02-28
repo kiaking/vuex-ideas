@@ -24,7 +24,9 @@ export type Module<
   S extends State = State,
   G extends Record<string, Getter> = Record<string, Getter>,
   A extends Record<string, Action> = Record<string, Action>
-> = StoreWithState<S> & StoreWithGetters<G> & StoreWithActions<A>
+> = { name: string } & StoreWithState<S> &
+  StoreWithGetters<G> &
+  StoreWithActions<A>
 
 export interface ModuleDefinition<
   S extends State = State,
