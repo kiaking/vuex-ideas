@@ -2,7 +2,7 @@ import { ref, computed, ComputedRef } from 'vue'
 import { defineStore } from '../../src'
 import greeterStore from './greeter'
 
-export default defineStore('counter', (use) => {
+export default defineStore('counter', use => {
   const greeter = use(greeterStore)
 
   const count = ref(1)

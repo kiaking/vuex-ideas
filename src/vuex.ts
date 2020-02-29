@@ -1,6 +1,6 @@
 import { App, InjectionKey, inject } from 'vue'
 import { Container, createContainer } from './container'
-import { Store, StoreDefinition, createStore } from './store'
+import { Store, StoreDefinition, createAndBindStore } from './store'
 
 export interface Vuex {
   install(app: App, vuex: Vuex): void
@@ -50,11 +50,12 @@ function getStore<T>(vuex: Vuex, definition: StoreDefinition<T>): Store<T> {
     return existingStore
   }
 
+  // or else, we'll proceed to store creation. At first, we'll register an
+  // empty store to the container, then update the store afterward. this
+  // is for cross-store composition.
   const store = vuex.container.reserve<T>(name)
 
-  createStore(vuex, store, setup)
-
-  vuex.container.register(name, store)
+  createAndBindStore(vuex, store, setup)
 
   return store
 }
