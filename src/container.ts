@@ -2,9 +2,9 @@ import { Store } from './store'
 
 export interface Container {
   stores: ContainerRegistry
-  get<T>(name: string): Store<T> | null
-  reserve<T>(name: string): Store<T>
-  register<T>(name: string, store: Store<T>): void
+  get<T extends Store>(name: string): T | null
+  reserve<T extends Store>(name: string): T
+  register<T extends Store>(name: string, store: T): void
 }
 
 export interface ContainerRegistry {
@@ -14,17 +14,17 @@ export interface ContainerRegistry {
 export function createContainer(): Container {
   const stores: ContainerRegistry = {}
 
-  function get<T>(name: string): Store<T> | null {
+  function get<T extends Store>(name: string): T | null {
     return stores[name] || null
   }
 
-  function reserve<T>(name: string): Store<T> {
+  function reserve<T extends Store>(name: string): T {
     stores[name] = {}
 
     return stores[name]
   }
 
-  function register<T>(name: string, store: Store<T>): void {
+  function register<T extends Store>(name: string, store: T): void {
     stores[name] = store
   }
 
