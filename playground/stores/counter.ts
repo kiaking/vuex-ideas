@@ -1,18 +1,18 @@
-import { ref, computed, ComputedRef } from 'vue'
+import { ref, computed } from 'vue'
 import { defineStore } from '../../src'
-import greeterStore from './greeter'
 
 export default defineStore('counter', use => {
-  const greeter = use(greeterStore)
-
   const count = ref(1)
 
-  const countWithGreet: ComputedRef<string> = computed(() => {
-    return `${count.value} ${greeter.greet.value}`
-  })
+  const double = computed(() => count.value * 2)
+
+  function increment() {
+    count.value++
+  }
 
   return {
     count,
-    countWithGreet
+    double,
+    increment
   }
 })

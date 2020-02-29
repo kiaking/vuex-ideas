@@ -34,6 +34,10 @@ export function useVuex(): Vuex {
   return inject(vuexKey)!
 }
 
+export function useStore<T>(definition: StoreDefinition<T>): Store<T> {
+  return useVuex().store(definition)
+}
+
 /**
  * Get a registered store from the container by the given store definition.
  * If the store doesn't exist in the container yet, it will first create a
