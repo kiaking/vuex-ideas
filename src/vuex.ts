@@ -1,5 +1,4 @@
-import { App } from 'vue'
-import { vuexKey } from './injectKey'
+import { App, InjectionKey, inject } from 'vue'
 import { Container, createContainer } from './container'
 import { Store, StoreDefinition, createStore } from './store'
 
@@ -8,6 +7,8 @@ export interface Vuex {
   container: Container
   store<T>(definition: StoreDefinition<T>): Store<T>
 }
+
+export const vuexKey = ('vuex' as unknown) as InjectionKey<Vuex>
 
 export function createVuex(): Vuex {
   const container = createContainer()
@@ -27,6 +28,10 @@ export function createVuex(): Vuex {
   }
 
   return vuex
+}
+
+export function useVuex(): Vuex {
+  return inject(vuexKey)!
 }
 
 /**

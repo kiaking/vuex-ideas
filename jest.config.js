@@ -5,15 +5,12 @@ module.exports = {
   testMatch: ['<rootDir>__tests__/**/*spec.ts'],
   watchPathIgnorePatterns: ['/node_modules/'],
   moduleNameMapper: {
-    "^app/(.*)$": "<rootDir>/src/$1",
+    "^src/(.*)$": "<rootDir>/src/$1",
     "^test/(.*)$": "<rootDir>/test/$1"
   },
   coverageDirectory: 'coverage',
   coverageReporters: ['html', 'lcov', "text-summary", "clover"],
   collectCoverageFrom: [
-    'packages/*/src/**/*.ts',
-    '!packages/runtime-test/src/utils/**',
-    '!packages/template-explorer/**',
-    '!packages/size-check/**'
+    'src/**/*.ts'
   ]
 }

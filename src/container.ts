@@ -15,7 +15,7 @@ export function createContainer(): Container {
   const stores: ContainerRegistry = {}
 
   function get<T>(name: string): Store<T> | null {
-    return stores[name] ?? null
+    return stores[name] || null
   }
 
   function reserve<T>(name: string): Store<T> {
