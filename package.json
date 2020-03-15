@@ -11,6 +11,9 @@
     "test": "jest",
     "coverage": "jest --collect-coverage"
   },
+  "peerDependencies": {
+    "vue": "3.0.0-alpha.8"
+  },
   "devDependencies": {
     "@types/jest": "^25.1.4",
     "@vue/compiler-sfc": "3.0.0-alpha.8",
