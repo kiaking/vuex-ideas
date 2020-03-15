@@ -10,12 +10,12 @@ const banner =
  */`
 
 const configs = [
-  { input: 'src/index.ts', file: 'dist/vuex.esm.js', format: 'es', browser: true, env: 'development' },
-  { input: 'src/index.ts', file: 'dist/vuex.esm.prod.js', format: 'es', browser: true, env: 'production' },
-  { input: 'src/index.ts', file: 'dist/vuex.esm-bundler.js', format: 'es', env: 'development' },
-  { input: 'src/index.ts', file: 'dist/vuex.global.js', format: 'iife', env: 'development' },
-  { input: 'src/index.ts', file: 'dist/vuex.global.prod.js', format: 'iife', minify: true, env: 'production' },
-  { input: 'src/index.ts', file: 'dist/vuex.cjs.js', format: 'cjs', env: 'development' }
+  { file: 'dist/vuex.esm.js', format: 'es', browser: true, env: 'development' },
+  { file: 'dist/vuex.esm.prod.js', format: 'es', browser: true, env: 'production' },
+  { file: 'dist/vuex.esm-bundler.js', format: 'es', env: 'development' },
+  { file: 'dist/vuex.global.js', format: 'iife', env: 'development' },
+  { file: 'dist/vuex.global.prod.js', format: 'iife', minify: true, env: 'production' },
+  { file: 'dist/vuex.cjs.js', format: 'cjs', env: 'development' }
 ]
 
 function createEntries() {
@@ -25,7 +25,7 @@ function createEntries() {
 function createEntry(config) {
   const c = {
     external: ['vue'],
-    input: config.input,
+    input: 'src/index.ts',
     plugins: [],
     output: {
       banner,
