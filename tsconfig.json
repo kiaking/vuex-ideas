@@ -10,7 +10,7 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "rootDir": ".",
-    "outDir": "lib",
+    "outDir": "dist",
     "declaration": true,
     "sourceMap": true,
     "removeComments": false,
