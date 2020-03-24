@@ -192,7 +192,7 @@ function createGetters<S extends State, G extends Getters, A extends Actions>(
       const fn = getters[name]
       const args = (arguments as unknown) as any[]
 
-      return computed(() => fn.apply(store, args)).value
+      return computed(() => fn.apply(store, args))
     } as StoreWithGetters<G>[typeof name]
   }
 
