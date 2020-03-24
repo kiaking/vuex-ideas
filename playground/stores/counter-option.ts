@@ -4,7 +4,7 @@ export default defineStore({
   name: 'counter-option',
 
   state: () => ({
-    count: 2
+    count: 1
   }),
 
   getters: {
@@ -15,6 +15,7 @@ export default defineStore({
 
   actions: {
     increment(): void {
+      console.log(this.double)
       this.state.count++
     }
   }

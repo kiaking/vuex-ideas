@@ -2,7 +2,9 @@ import { App, InjectionKey, inject } from 'vue'
 import { Container, createContainer } from './container'
 import {
   CompositionStore,
+  UnwrappedCompositionStore,
   OptionStore,
+  UnwrappedOptionStore,
   StoreCompositionDefinition,
   StoreOptionDefinition,
   State,
@@ -14,10 +16,12 @@ import {
 export interface Vuex {
   install(app: App, vuex: Vuex): void
   container: Container
-  store<T>(definition: StoreCompositionDefinition<T>): CompositionStore<T>
+  store<T>(
+    definition: StoreCompositionDefinition<T>
+  ): UnwrappedCompositionStore<T>
   store<S extends State, G extends Getters, A extends Actions>(
     definition: StoreOptionDefinition<S, G, A>
-  ): OptionStore<S, G, A>
+  ): UnwrappedOptionStore<S, G, A>
 }
 
 export const vuexKey = ('vuex' as unknown) as InjectionKey<Vuex>
@@ -31,7 +35,7 @@ export function createVuex(): Vuex {
 
   function store<T>(
     definition: StoreCompositionDefinition<T>
-  ): CompositionStore<T>
+  ): UnwrappedCompositionStore<T>
 
   function store<S extends State, G extends Getters, A extends Actions>(
     definition: StoreOptionDefinition<S, G, A>
@@ -101,3 +105,8 @@ function getStore(vuex: Vuex, definition: any): any {
 
   return store
 }
+
+// function getUnwrappedStore<T>(
+//   vuex: Vuex,
+//   definition: StoreCompositionDefinition<T>
+// ): UnwrappedCompositionStore<T> {}

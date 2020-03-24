@@ -1,4 +1,4 @@
-import { reactive, computed } from 'vue'
+import { reactive, computed, ComputedRef, UnwrapRef } from 'vue'
 import { isString, isFunction } from './utils'
 import { Vuex } from './vuex'
 
@@ -11,11 +11,21 @@ export type Store<
 
 export type CompositionStore<T> = T
 
+export type UnwrappedCompositionStore<T = {}> = {
+  [P in keyof T]: UnwrapRef<T[P]>
+}
+
 export type OptionStore<
   S extends State,
   G extends Getters,
   A extends Actions
 > = StoreWithState<S> & StoreWithGetters<G> & StoreWithActions<A>
+
+export type UnwrappedOptionStore<
+  S extends State,
+  G extends Getters,
+  A extends Actions
+> = StoreWithState<S> & StoreWithUnwrappedGetters<G> & StoreWithActions<A>
 
 export type StoreDefinition<
   T,
@@ -49,11 +59,13 @@ export type StoreSetup<
 
 export interface StoreCompositionSetup<T> {
   (
-    use: <U, S extends State, G extends Getters, A extends Actions>(
-      definition: StoreDefinition<U, S, G, A>
-    ) => Store<U, S, G, A>
+    use: <U, S, G extends Getters, A extends Actions>(
+      definition: StoreCompositionDefinition<U> | StoreOptionDefinition<S, G, A>
+    ) => S extends State ? OptionStore<S, G, A> : CompositionStore<U>
   ): CompositionStore<T>
 }
+
+export type Use<T, S extends State, G extends Getters, A extends Actions> = (definition: StoreDefinition<T, S, G, A>) => T extends StoreCompositionDefinition<T> ? CompositionStore<T> : null
 
 export interface StoreOptionSetup<
   S extends State,
@@ -62,8 +74,13 @@ export interface StoreOptionSetup<
 > {
   name: string
   state?: () => S
-  getters?: G & ThisType<G & StoreWithState<S> & StoreWithActions<A>>
-  actions?: A & ThisType<A & StoreWithState<S> & StoreWithGetters<G>>
+  getters?: G &
+    ThisType<
+      { [k in keyof G]: G[k] extends (...args: any[]) => infer R ? R : never } &
+        StoreWithState<S> &
+        StoreWithActions<A>
+    >
+  actions?: A & ThisType<A & StoreWithState<S> & StoreWithUnwrappedGetters<G>>
 }
 
 export type State = Record<string, any>
@@ -77,9 +94,13 @@ export type Getter = (...args: any[]) => any
 export type Getters = Record<string, Getter>
 
 export type StoreWithGetters<G extends Getters> = {
-  [k in keyof G]: G[k] extends (this: infer This, ...args: infer P) => infer R
-    ? (this: This, ...args: P) => R
+  [k in keyof G]: G[k] extends (...args: any[]) => infer R
+    ? ComputedRef<R>
     : never
+}
+
+export type StoreWithUnwrappedGetters<G extends Getters> = {
+  [k in keyof G]: G[k] extends (...args: any[]) => infer R ? R : never
 }
 
 export type Action = (...args: any[]) => any
@@ -144,75 +165,64 @@ export function createAndBindStore<
 ): void
 
 export function createAndBindStore(vuex: Vuex, store: any, setup: any): void {
-  const s = isFunction(setup)
-    ? createCompositionStore(vuex, setup)
-    : createOptionStore(setup)
-
-  Object.assign(store, s)
+  isFunction(setup)
+    ? createCompositionStore(vuex, store, setup)
+    : createOptionStore(store, setup)
 }
 
 function createCompositionStore<T>(
   vuex: Vuex,
+  store: CompositionStore<T>,
   setup: StoreCompositionSetup<T>
 ): CompositionStore<T> {
-  return setup(vuex.store)
+  return Object.assign(store, setup(vuex.store))
 }
 
 function createOptionStore<
   S extends State,
   G extends Getters,
   A extends Actions
->(setup: StoreOptionSetup<S, G, A>): OptionStore<S, G, A> {
-  const store = {} as OptionStore<S, G, A>
-
-  const state = createState(setup.state)
-  const getters = createGetters(store, setup.getters)
-  const actions = createActions(store, setup.actions)
-
-  store.state = state
-
-  Object.assign(store, getters)
-  Object.assign(store, actions)
-
-  return store
+>(store: OptionStore<S, G, A>, setup: StoreOptionSetup<S, G, A>): void {
+  bindState(store, setup.state)
+  bindGetters(store, setup.getters)
+  bindActions(store, setup.actions)
 }
 
-function createState<S extends State>(state?: () => S): S {
-  return reactive(isFunction(state) ? state() : ({} as any))
+function bindState<S extends State, G extends Getters, A extends Actions>(
+  store: OptionStore<S, G, A>,
+  state?: () => S
+): void {
+  return (store.state = reactive(isFunction(state) ? state() : ({} as any)))
 }
 
-function createGetters<S extends State, G extends Getters, A extends Actions>(
+function bindGetters<S extends State, G extends Getters, A extends Actions>(
   store: OptionStore<S, G, A>,
   getters?: G
-): StoreWithGetters<G> {
-  const wrappedGetters: StoreWithGetters<G> = {} as StoreWithGetters<G>
-
+): void {
   for (const name in getters) {
-    wrappedGetters[name] = function () {
+    ;(store as any)[`${name}__proxy`] = (function () {
       const fn = getters[name]
       const args = (arguments as unknown) as any[]
 
       return computed(() => fn.apply(store, args))
-    } as StoreWithGetters<G>[typeof name]
-  }
+    })() as StoreWithGetters<G>[typeof name]
 
-  return wrappedGetters
+    Object.defineProperty(store, name, {
+      get: () => store[`${name}__proxy`].value
+    })
+  }
 }
 
-function createActions<S extends State, G extends Getters, A extends Actions>(
+function bindActions<S extends State, G extends Getters, A extends Actions>(
   store: OptionStore<S, G, A>,
   actions?: A
-): StoreWithActions<A> {
-  const wrappedActions = {} as StoreWithActions<A>
-
+): void {
   for (const name in actions) {
-    wrappedActions[name] = function () {
+    ;(store as any)[name] = function () {
       const fn = actions[name]
       const args = (arguments as unknown) as any[]
 
       return fn.apply(store, args)
     } as StoreWithActions<A>[typeof name]
   }
-
-  return wrappedActions
 }

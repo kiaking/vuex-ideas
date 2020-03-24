@@ -1,18 +1,23 @@
-// import { ref, computed, ComputedRef } from 'vue'
-// import { defineStore } from '../../src'
-// import counterStore from './counter'
+import { ref, computed, ComputedRef } from 'vue'
+import { defineStore } from '../../src'
+import counterStore from './counter'
+import counterOStore from './counter-option'
 
-// export default defineStore('greeter', use => {
-//   const counter = use(counterStore)
+export default defineStore('greeter', use => {
+  const counter = use(counterStore)
+  const co = use(counterOStore)
 
-//   const greet = ref('Hello')
+  const greet = ref('Hello')
 
-//   const greetWithCount: ComputedRef<string> = computed(() => {
-//     return `${greet.value} ${counter.count.value}`
-//   })
+  counter.double
+  co.state
 
-//   return {
-//     greet,
-//     greetWithCount
-//   }
-// })
+  const greetWithCount: ComputedRef<string> = computed(() => {
+    return `${greet.value} ${counter.count.value}`
+  })
+
+  return {
+    greet,
+    greetWithCount
+  }
+})
