@@ -13,6 +13,6 @@ export default defineStore('counter', (use) => {
   return {
     count,
     double,
-    increment,
+    increment
   }
 })

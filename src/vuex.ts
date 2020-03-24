@@ -8,7 +8,7 @@ import {
   State,
   Getters,
   Actions,
-  createAndBindStore,
+  createAndBindStore
 } from './store'
 
 export interface Vuex {
@@ -44,7 +44,7 @@ export function createVuex(): Vuex {
   const vuex = {
     install,
     container,
-    store,
+    store
   }
 
   return vuex
@@ -85,14 +85,14 @@ function getStore<S extends State, G extends Getters, A extends Actions>(
 function getStore(vuex: Vuex, definition: any): any {
   const { name, setup } = definition
 
-  // if the store is already registered, just return it
+  // If the store is already registered, just return it.
   const existingStore = vuex.container.get(name)
 
   if (existingStore) {
     return existingStore
   }
 
-  // or else, we'll proceed to store creation. At first, we'll register an
+  // Or else, we'll proceed to store creation. At first, we'll register an
   // empty store to the container, then update the store afterward. this
   // is for cross-store composition.
   const store = vuex.container.reserve(name)

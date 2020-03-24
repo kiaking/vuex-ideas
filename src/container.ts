@@ -32,6 +32,6 @@ export function createContainer(): Container {
     stores,
     get,
     reserve,
-    register,
+    register
   }
 }
