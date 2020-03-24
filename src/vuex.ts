@@ -8,7 +8,7 @@ import {
   State,
   Getters,
   Actions,
-  createAndBindStore
+  createAndBindStore,
 } from './store'
 
 export interface Vuex {
@@ -44,7 +44,7 @@ export function createVuex(): Vuex {
   const vuex = {
     install,
     container,
-    store
+    store,
   }
 
   return vuex

@@ -188,7 +188,7 @@ function createGetters<S extends State, G extends Getters, A extends Actions>(
   const wrappedGetters: StoreWithGetters<G> = {} as StoreWithGetters<G>
 
   for (const name in getters) {
-    wrappedGetters[name] = function() {
+    wrappedGetters[name] = function () {
       const fn = getters[name]
       const args = (arguments as unknown) as any[]
 
@@ -206,7 +206,7 @@ function createActions<S extends State, G extends Getters, A extends Actions>(
   const wrappedActions = {} as StoreWithActions<A>
 
   for (const name in actions) {
-    wrappedActions[name] = function() {
+    wrappedActions[name] = function () {
       const fn = actions[name]
       const args = (arguments as unknown) as any[]
 
