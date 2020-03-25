@@ -65,7 +65,9 @@ export interface StoreCompositionSetup<T> {
   ): CompositionStore<T>
 }
 
-export type Use<T, S extends State, G extends Getters, A extends Actions> = (definition: StoreDefinition<T, S, G, A>) => T extends StoreCompositionDefinition<T> ? CompositionStore<T> : null
+export type Use<T, S extends State, G extends Getters, A extends Actions> = (
+  definition: StoreDefinition<T, S, G, A>
+) => T extends StoreCompositionDefinition<T> ? CompositionStore<T> : null
 
 export interface StoreOptionSetup<
   S extends State,
@@ -74,8 +76,14 @@ export interface StoreOptionSetup<
 > {
   name: string
   state?: () => S
-  getters?: G & ThisType<StoreWithState<S> & StoreWithUnwrappedGetters<G> & StoreWithActions<A>>
-  actions?: A & ThisType<A & StoreWithState<S> & StoreWithUnwrappedGetters<G> & StoreWithActions<A>>
+  getters?: G &
+    ThisType<
+      StoreWithState<S> & StoreWithUnwrappedGetters<G> & StoreWithActions<A>
+    >
+  actions?: A &
+    ThisType<
+      A & StoreWithState<S> & StoreWithUnwrappedGetters<G> & StoreWithActions<A>
+    >
 }
 
 export type State = Record<string, any>
@@ -178,7 +186,7 @@ function createOptionStore<
   G extends Getters,
   A extends Actions
 >(store: OptionStore<S, G, A>, setup: StoreOptionSetup<S, G, A>): void {
-  (store as any).isOptionStore = true
+  ;(store as any).isOptionStore = true
   ;(store as any).data = {}
   bindState(store, setup.state)
   bindGetters(store, setup.getters)
@@ -189,7 +197,9 @@ function bindState<S extends State, G extends Getters, A extends Actions>(
   store: OptionStore<S, G, A>,
   state?: () => S
 ): void {
-  (store as any).data.state = reactive(isFunction(state) ? state() : ({} as any))
+  ;(store as any).data.state = reactive(
+    isFunction(state) ? state() : ({} as any)
+  )
 
   Object.defineProperty(store, 'state', {
     get: () => (store as any).data.state
@@ -236,9 +246,11 @@ export function createRawStore<T>(
   store: CompositionStore<T>
 ): CompositionStore<T>
 
-export function createRawStore<S extends State, G extends Getters, A extends Actions>(
-  store: OptionStore<S, G, A>
-): OptionStore<S, G, A>
+export function createRawStore<
+  S extends State,
+  G extends Getters,
+  A extends Actions
+>(store: OptionStore<S, G, A>): OptionStore<S, G, A>
 
 export function createRawStore(store: any): any {
   if (!store.isOptionStore) {
@@ -249,7 +261,7 @@ export function createRawStore(store: any): any {
 
   for (const name in store.data) {
     Object.defineProperty(proxy, name, {
-      get () {
+      get() {
         return store.data[name]
       }
     })
@@ -262,9 +274,11 @@ export function createUnwrappedStore<T>(
   store: CompositionStore<T>
 ): UnwrappedCompositionStore<T>
 
-export function createUnwrappedStore<S extends State, G extends Getters, A extends Actions>(
-  store: OptionStore<S, G, A>
-): UnwrappedOptionStore<S, G, A>
+export function createUnwrappedStore<
+  S extends State,
+  G extends Getters,
+  A extends Actions
+>(store: OptionStore<S, G, A>): UnwrappedOptionStore<S, G, A>
 
 export function createUnwrappedStore(store: any): any {
   const proxy = {} as any
@@ -279,7 +293,7 @@ export function createUnwrappedStore(store: any): any {
 function assignUnwrapProxies(proxy: any, store: any): void {
   for (const name in store) {
     Object.defineProperty(proxy, name, {
-      get () {
+      get() {
         const p = store[name]
         return isRef(p) ? p.value : p
       }

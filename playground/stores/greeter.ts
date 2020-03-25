@@ -3,7 +3,7 @@ import { defineStore } from '../../src'
 import counterStore from './counter'
 import counterOStore from './counter-option'
 
-export default defineStore('greeter', use => {
+export default defineStore('greeter', (use) => {
   const counter = use(counterStore)
   const co = use(counterOStore)
 

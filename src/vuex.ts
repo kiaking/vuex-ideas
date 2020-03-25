@@ -24,9 +24,7 @@ export interface Vuex {
   store<S extends State, G extends Getters, A extends Actions>(
     definition: StoreOptionDefinition<S, G, A>
   ): UnwrappedOptionStore<S, G, A>
-  raw<T>(
-    definition: StoreCompositionDefinition<T>
-  ): CompositionStore<T>
+  raw<T>(definition: StoreCompositionDefinition<T>): CompositionStore<T>
   raw<S extends State, G extends Getters, A extends Actions>(
     definition: StoreOptionDefinition<S, G, A>
   ): OptionStore<S, G, A>
@@ -146,7 +144,11 @@ function getUnwrappedStore<T>(
   definition: StoreCompositionDefinition<T>
 ): UnwrappedCompositionStore<T>
 
-function getUnwrappedStore<S extends State, G extends Getters, A extends Actions>(
+function getUnwrappedStore<
+  S extends State,
+  G extends Getters,
+  A extends Actions
+>(
   vuex: Vuex,
   definition: StoreOptionDefinition<S, G, A>
 ): UnwrappedOptionStore<S, G, A>
