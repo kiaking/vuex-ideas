@@ -15,8 +15,7 @@ export default defineStore({
 
   actions: {
     increment(): void {
-      console.log(this.double)
-      this.state.count++
+      this.state.count = this.state.count + this.double
     }
   }
 })

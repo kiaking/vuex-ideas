@@ -1,6 +1,6 @@
 <template>
   <div class="APP">
-    <p>Count: {{ count }}</p>
+    <p>Count: {{ count.count }}</p>
     <p>Double: {{ double }}</p>
     <!-- <p>Full Name: {{ fullName }}</p> -->
     <!-- <p>Count with Greet: {{ countWithGreet }}</p> -->
@@ -18,15 +18,17 @@
 // import { computed } from 'vue'
 import { useStore } from '../src'
 import counterStore from './stores/counter'
+import counterOStore from './stores/counter-option'
 // import greeterStore from './stores/greeter'
 
 export default {
   setup() {
-    const counter = useStore(counterStore)
+    // const counter = useStore(counterStore)
+    const counter = useStore(counterOStore)
     // const greeter = vuex.store(greeterStore)
-
+console.log('APP', counter)
     return {
-      count: counter.count,
+      count: counter.state,
       double: counter.double,
     //   counterState: counter.state,
     //   double: computed(() => counter.double()),

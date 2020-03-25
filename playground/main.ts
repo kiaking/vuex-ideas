@@ -9,17 +9,19 @@ const app = createApp(App)
 app.use(vuex)
 
 const c = vuex.store(counterStore)
-
-c.count
-c.double
-c.increment
+console.log(c)
+// console.log(c.count)
+// console.log(c.double)
+// c.increment()
+// console.log(c.count)
+// console.log(c.double)
 
 const co = vuex.store(counterOptionStore)
-
-co.state
 console.log(co)
-co.increment()
-co.increment()
-co.increment()
+console.log(co.state.count)
+console.log(co.double)
+// co.increment()
+// console.log(co.state.count)
+// console.log(co.double)
 
 app.mount('#app')

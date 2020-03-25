@@ -10,7 +10,9 @@ import {
   State,
   Getters,
   Actions,
-  createAndBindStore
+  createAndBindStore,
+  createRawStore,
+  createUnwrappedStore
 } from './store'
 
 export interface Vuex {
@@ -22,6 +24,12 @@ export interface Vuex {
   store<S extends State, G extends Getters, A extends Actions>(
     definition: StoreOptionDefinition<S, G, A>
   ): UnwrappedOptionStore<S, G, A>
+  raw<T>(
+    definition: StoreCompositionDefinition<T>
+  ): CompositionStore<T>
+  raw<S extends State, G extends Getters, A extends Actions>(
+    definition: StoreOptionDefinition<S, G, A>
+  ): OptionStore<S, G, A>
 }
 
 export const vuexKey = ('vuex' as unknown) as InjectionKey<Vuex>
@@ -39,16 +47,29 @@ export function createVuex(): Vuex {
 
   function store<S extends State, G extends Getters, A extends Actions>(
     definition: StoreOptionDefinition<S, G, A>
-  ): OptionStore<S, G, A>
+  ): UnwrappedOptionStore<S, G, A>
 
   function store(definition: any): any {
-    return getStore(vuex, definition)
+    return getUnwrappedStore(vuex, definition)
+  }
+
+  function raw<T>(
+    definition: StoreCompositionDefinition<T>
+  ): CompositionStore<T>
+
+  function raw<S extends State, G extends Getters, A extends Actions>(
+    definition: StoreOptionDefinition<S, G, A>
+  ): OptionStore<S, G, A>
+
+  function raw(definition: any): any {
+    return getRawStore(vuex, definition)
   }
 
   const vuex = {
     install,
     container,
-    store
+    store,
+    raw
   }
 
   return vuex
@@ -67,7 +88,7 @@ export function useStore<S extends State, G extends Getters, A extends Actions>(
 ): OptionStore<S, G, A>
 
 export function useStore(definition: any): any {
-  return useVuex().store(definition)
+  return useVuex().raw(definition)
 }
 
 /**
@@ -106,7 +127,30 @@ function getStore(vuex: Vuex, definition: any): any {
   return store
 }
 
-// function getUnwrappedStore<T>(
-//   vuex: Vuex,
-//   definition: StoreCompositionDefinition<T>
-// ): UnwrappedCompositionStore<T> {}
+function getRawStore<T>(
+  vuex: Vuex,
+  definition: StoreCompositionDefinition<T>
+): CompositionStore<T>
+
+function getRawStore<S extends State, G extends Getters, A extends Actions>(
+  vuex: Vuex,
+  definition: StoreOptionDefinition<S, G, A>
+): OptionStore<S, G, A>
+
+function getRawStore(vuex: Vuex, definition: any): any {
+  return createRawStore(getStore(vuex, definition))
+}
+
+function getUnwrappedStore<T>(
+  vuex: Vuex,
+  definition: StoreCompositionDefinition<T>
+): UnwrappedCompositionStore<T>
+
+function getUnwrappedStore<S extends State, G extends Getters, A extends Actions>(
+  vuex: Vuex,
+  definition: StoreOptionDefinition<S, G, A>
+): UnwrappedOptionStore<S, G, A>
+
+function getUnwrappedStore(vuex: Vuex, definition: any): any {
+  return createUnwrappedStore(getStore(vuex, definition))
+}
