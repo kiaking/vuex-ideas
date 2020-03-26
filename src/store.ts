@@ -97,25 +97,10 @@ export function defineStore<
   A extends Actions
 >(setup: OptionSetup<S, G, A>, never?: never): OptionDefinition<S, G, A>
 
-export function defineStore(maybeDefinition: any, setup: any): any {
-  return isString(maybeDefinition)
-    ? defineCompositionStore(maybeDefinition, setup)
-    : defineOptionStore(maybeDefinition)
-}
-
-function defineCompositionStore<T>(
-  name: string,
-  setup: CompositionSetup<T>
-): CompositionDefinition<T> {
-  return { name, setup }
-}
-
-function defineOptionStore<
-  S extends State,
-  G extends Getters,
-  A extends Actions
->(setup: OptionSetup<S, G, A>) {
-  return { name: setup.name, setup }
+export function defineStore(maybeSetup: any, setup: any): any {
+  return isString(maybeSetup)
+    ? { name: maybeSetup, setup }
+    : { name: maybeSetup.name, setup: maybeSetup }
 }
 
 export function createAndBindStore<T>(
