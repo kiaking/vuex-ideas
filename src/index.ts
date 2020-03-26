@@ -1,15 +1,12 @@
-export { Vuex, vuexKey, createVuex, useVuex, useStore } from './vuex'
-export { Container, Registry } from './container'
+export { Vuex, Registry, vuexKey, createVuex, useVuex, useStore } from './vuex'
 export {
   Store,
   CompositionStore,
   ReactiveCompositionStore,
   OptionStore,
-  Definition,
   CompositionDefinition,
   OptionDefinition,
-  Setup,
-  SetupContext,
+  Context,
   CompositionSetup,
   OptionSetup,
   defineStore
