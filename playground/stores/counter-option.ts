@@ -4,18 +4,21 @@ export default defineStore({
   name: 'counter-option',
 
   state: () => ({
-    count: 1
+    count: 1,
+    option: {
+      value: 100
+    }
   }),
 
   getters: {
     double(): number {
-      return this.state.count * 2
+      return this.count * 2
     }
   },
 
   actions: {
     increment(): void {
-      this.state.count = this.state.count + this.double
+      this.count = this.count + this.double
     }
   }
 })

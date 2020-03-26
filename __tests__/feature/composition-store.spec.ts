@@ -14,12 +14,12 @@ describe('feature/composition-store', () => {
 
     const counter = vuex.store(counterStore)
 
-    expect(counter.count.value).toBe(1)
-    expect(counter.double.value).toBe(2)
+    expect(counter.count).toBe(1)
+    expect(counter.double).toBe(2)
 
     counter.increment()
 
-    expect(counter.count.value).toBe(2)
-    expect(counter.double.value).toBe(4)
+    expect(counter.count).toBe(2)
+    expect(counter.double).toBe(4)
   })
 })

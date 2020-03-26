@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from '../../src'
 
-export default defineStore('counter', (use) => {
+export default defineStore('counter', () => {
   const count = ref(1)
 
   const double = computed(() => count.value * 2)

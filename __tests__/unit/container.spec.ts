@@ -30,7 +30,7 @@ describe('unit/container', () => {
   it('reserves the store name, and return empty store', () => {
     const container = createContainer()
 
-    const store = container.reserve('test')
+    const store = container.reservePlain('test')
 
     expect(container.get('test')).toBe(store)
   })
