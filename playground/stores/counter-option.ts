@@ -1,13 +1,17 @@
 import { defineStore } from '../../src'
+import greeter from './greeter'
+import greeterO from './greeter-option'
 
 export default defineStore({
   name: 'counter-option',
 
+  use: () => ({
+    greeter,
+    greeterO
+  }),
+
   state: () => ({
-    count: 1,
-    option: {
-      value: 100
-    }
+    count: 1
   }),
 
   getters: {
@@ -18,6 +22,8 @@ export default defineStore({
 
   actions: {
     increment(): void {
+      this.greeter
+      this.greeterO.
       this.count = this.count + this.double
     }
   }

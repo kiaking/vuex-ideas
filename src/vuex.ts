@@ -9,6 +9,7 @@ import {
   OptionDefinition,
   CompositionSetup,
   OptionSetup,
+  Module,
   State,
   Getters,
   Actions
@@ -18,12 +19,12 @@ export interface Vuex {
   registry: Registry
   install(app: App, vuex: Vuex): void
   raw<T>(definition: CompositionDefinition<T>): CompositionStore<T>
-  raw<S extends State, G extends Getters, A extends Actions>(
-    definition: OptionDefinition<S, G, A>
+  raw<M extends Module, S extends State, G extends Getters, A extends Actions>(
+    definition: OptionDefinition<M, S, G, A>
   ): OptionStore<S, G, A>
   store<T>(definition: CompositionDefinition<T>): ReactiveCompositionStore<T>
-  store<S extends State, G extends Getters, A extends Actions>(
-    definition: OptionDefinition<S, G, A>
+  store<M extends Module, S extends State, G extends Getters, A extends Actions>(
+    definition: OptionDefinition<M, S, G, A>
   ): OptionStore<S, G, A>
 }
 
@@ -48,8 +49,8 @@ export function createVuex(): Vuex {
    */
   function raw<T>(definition: CompositionDefinition<T>): CompositionStore<T>
 
-  function raw<S extends State, G extends Getters, A extends Actions>(
-    definition: OptionDefinition<S, G, A>
+  function raw<M extends Module, S extends State, G extends Getters, A extends Actions>(
+    definition: OptionDefinition<M, S, G, A>
   ): OptionStore<S, G, A>
 
   function raw(definition: any): any {
@@ -65,8 +66,8 @@ export function createVuex(): Vuex {
     definition: CompositionDefinition<T>
   ): ReactiveCompositionStore<T>
 
-  function store<S extends State, G extends Getters, A extends Actions>(
-    definition: OptionDefinition<S, G, A>
+  function store<M extends Module, S extends State, G extends Getters, A extends Actions>(
+    definition: OptionDefinition<M, S, G, A>
   ): OptionStore<S, G, A>
 
   function store(definition: any): any {
@@ -83,9 +84,9 @@ function get<T>(
   definition: CompositionDefinition<T>
 ): CompositionStore<T>
 
-function get<S extends State, G extends Getters, A extends Actions>(
+function get<M extends Module, S extends State, G extends Getters, A extends Actions>(
   vuex: Vuex,
-  definition: OptionDefinition<S, G, A>
+  definition: OptionDefinition<M, S, G, A>
 ): OptionStore<S, G, A>
 
 function get(vuex: any, definition: any): any {
@@ -97,9 +98,9 @@ function reserve<T>(
   definition: CompositionDefinition<T>
 ): CompositionStore<T>
 
-function reserve<S extends State, G extends Getters, A extends Actions>(
+function reserve<M extends Module, S extends State, G extends Getters, A extends Actions>(
   vuex: Vuex,
-  definition: OptionDefinition<S, G, A>
+  definition: OptionDefinition<M, S, G, A>
 ): OptionStore<S, G, A>
 
 function reserve(vuex: any, definition: any): any {
@@ -116,10 +117,11 @@ export function createStore<T>(
 ): CompositionStore<T>
 
 export function createStore<
+  M extends Module,
   S extends State,
   G extends Getters,
   A extends Actions
->(vuex: Vuex, definition: OptionDefinition<S, G, A>): OptionStore<S, G, A>
+>(vuex: Vuex, definition: OptionDefinition<M, S, G, A>): OptionStore<S, G, A>
 
 export function createStore(vuex: any, definition: any): void {
   // At first, register an empty store to the registry, then update the store
@@ -142,10 +144,11 @@ function createCompositionStore<T>(
 }
 
 function createOptionStore<
+  M extends Module,
   S extends State,
   G extends Getters,
   A extends Actions
->(store: OptionStore<S, G, A>, setup: OptionSetup<S, G, A>): void {
+>(store: OptionStore<S, G, A>, setup: OptionSetup<M, S, G, A>): void {
   setup.state && bindState(store, setup.state)
   setup.getters && bindGetters(store, setup.getters)
   setup.actions && bindActions(store, setup.actions)
@@ -221,8 +224,8 @@ export function useStore<T>(
   definition: CompositionDefinition<T>
 ): CompositionStore<T>
 
-export function useStore<S extends State, G extends Getters, A extends Actions>(
-  definition: OptionDefinition<S, G, A>
+export function useStore<M extends Module, S extends State, G extends Getters, A extends Actions>(
+  definition: OptionDefinition<M, S, G, A>
 ): OptionStore<S, G, A>
 
 export function useStore(definition: any): any {
