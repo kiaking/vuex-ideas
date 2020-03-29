@@ -70,8 +70,14 @@ export type Module = Record<string, Definition>
 export type StoreWithModules<M extends Module> = {
   [K in keyof M]: M[K] extends CompositionDefinition<any>
     ? ReactiveCompositionStore<ReturnType<M[K]['setup']>>
-    : OptionStore<any, any, any>
+    : MapOption<M[K]>
 }
+
+export type MapOption<
+  T extends OptionDefinition<any, any, any, any>
+> = T extends OptionDefinition<any, infer S, infer G, infer A>
+  ? OptionStore<S, G, A>
+  : never
 
 export type State = Record<string, any>
 

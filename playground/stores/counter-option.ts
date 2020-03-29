@@ -23,7 +23,7 @@ export default defineStore({
   actions: {
     increment(): void {
       this.greeter
-      this.greeterO.
+      this.greeterO
       this.count = this.count + this.double
     }
   }
