@@ -4,10 +4,17 @@ export {
   CompositionStore,
   ReactiveCompositionStore,
   OptionStore,
+  Definition,
   CompositionDefinition,
   OptionDefinition,
   Context,
   CompositionSetup,
   OptionSetup,
+  State,
+  Getter,
+  Getters,
+  Action,
+  Actions,
+  Modules,
   defineStore
 } from './store'

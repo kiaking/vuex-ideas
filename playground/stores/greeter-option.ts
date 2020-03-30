@@ -1,14 +1,21 @@
 import { defineStore } from '../../src'
+import counter from './counter-option'
+import other from './other'
 
 export default defineStore({
   name: 'greeter',
+
+  use: (): any => ({
+    counter,
+    other
+  }),
 
   state: () => ({
     greet: 'hello'
   }),
 
   getters: {
-    something (): number {
+    something(): number {
       return 1
     }
   },
