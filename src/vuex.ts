@@ -163,7 +163,11 @@ function createOptionStore<
   G extends Getters,
   A extends Actions,
   M extends Modules
->(vuex: Vuex, store: OptionStore<S, G, A, M>, setup: OptionSetup<S, G, A, M>): void {
+>(
+  vuex: Vuex,
+  store: OptionStore<S, G, A, M>,
+  setup: OptionSetup<S, G, A, M>
+): void {
   setup.state && bindState(store, setup.state)
   setup.getters && bindGetters(store, setup.getters)
   setup.actions && bindActions(store, setup.actions)
