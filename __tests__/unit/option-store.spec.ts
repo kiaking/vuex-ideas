@@ -11,7 +11,7 @@ describe('unit/option-store', () => {
         count: 1
       }),
       getters: {
-        double (): number {
+        double(): number {
           return this.count * 2
         }
       },
@@ -42,7 +42,7 @@ describe('unit/option-store', () => {
         count: 1
       }),
       getters: {
-        double (): number {
+        double(): number {
           return this.count * 2
         }
       },
@@ -80,7 +80,7 @@ describe('unit/option-store', () => {
         greeter
       }),
       getters: {
-        countWithGreet () {
+        countWithGreet() {
           return `${this.greeter.greet} 1`
         }
       }
@@ -105,7 +105,7 @@ describe('unit/option-store', () => {
         greeter
       }),
       getters: {
-        countWithGreet () {
+        countWithGreet() {
           return `${this.greeter.greet} 1`
         }
       }

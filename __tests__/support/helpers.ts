@@ -1,7 +1,7 @@
 import { createApp, ComponentOptions } from 'vue'
 import { Vuex } from 'src/index'
 
-export function mount (vuex: Vuex, component: ComponentOptions) {
+export function mount(vuex: Vuex, component: ComponentOptions) {
   const el = createElement()
 
   component.render = () => {}
@@ -13,7 +13,7 @@ export function mount (vuex: Vuex, component: ComponentOptions) {
   return app.mount(el)
 }
 
-function createElement () {
+function createElement() {
   const el = document.createElement('div')
 
   document.body.appendChild(el)
