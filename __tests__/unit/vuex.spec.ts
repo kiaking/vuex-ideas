@@ -1,5 +1,4 @@
-import { createVuex } from 'src/vuex'
-import { defineStore } from 'src/store'
+import { createVuex, defineStore } from 'src/index'
 
 describe('unit/vuex', () => {
   it('caches stores, and return it on second call', () => {
