@@ -6,8 +6,8 @@
     "dev": "webpack-dev-server --config playground/webpack.config.js",
     "dev:examples": "node examples/server.js",
     "build": "node scripts/build.js",
-    "lint": "prettier --write --parser typescript \"**/*.ts\"",
-    "lint:fail": "prettier --parser typescript \"**/*.ts\"",
+    "lint": "prettier --check --write --parser typescript \"**/*.ts\"",
+    "lint:fail": "prettier --check --parser typescript \"**/*.ts\"",
     "test": "jest",
     "coverage": "jest --collect-coverage"
   },
