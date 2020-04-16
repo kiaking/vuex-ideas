@@ -3,12 +3,12 @@ const path = require('path')
 const webpack = require('webpack')
 const { VueLoaderPlugin } = require('vue-loader')
 
-function buildEntry (dirname) {
+function buildEntry (dirname, main) {
   const lookupDir = path.join(__dirname, dirname)
 
   return fs.readdirSync(lookupDir).reduce((entries, dir) => {
     const fullDir = path.join(lookupDir, dir)
-    const entry = path.join(fullDir, 'main.js')
+    const entry = path.join(fullDir, main)
     if (fs.statSync(fullDir).isDirectory() && fs.existsSync(entry)) {
       entries[`${dirname}/${dir}`] = ['webpack-hot-middleware/client', entry]
     }
@@ -22,7 +22,8 @@ module.exports = {
   devtool: 'inline-source-map',
 
   entry: {
-    ...buildEntry('composition')
+    ...buildEntry('composition', 'main.js'),
+    ...buildEntry('typescript', 'main.ts')
   },
 
   output: {

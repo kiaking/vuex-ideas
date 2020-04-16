@@ -28,7 +28,8 @@
 
     "paths": {
       "src/*": ["src/*"],
-      "test/*": ["test/*"]
+      "test/*": ["__test__/*"],
+      "vuex": ["src/index"]
     },
 
     "types": [
@@ -38,6 +39,7 @@
 
   "include": [
     "src",
-    "__tests__"
+    "__tests__",
+    "examples"
   ]
 }
