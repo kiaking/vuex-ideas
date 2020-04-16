@@ -6,7 +6,7 @@ module.exports = {
   watchPathIgnorePatterns: ['/node_modules/'],
   moduleNameMapper: {
     "^src/(.*)$": "<rootDir>/src/$1",
-    "^test/(.*)$": "<rootDir>/test/$1"
+    "^test/(.*)$": "<rootDir>/__test__/$1"
   },
   coverageDirectory: 'coverage',
   coverageReporters: ['html', 'lcov', "text-summary", "clover"],
