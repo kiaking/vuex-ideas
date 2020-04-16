@@ -3,8 +3,7 @@
   "name": "vuex",
   "version": "0.1.0",
   "scripts": {
-    "dev": "webpack-dev-server --config playground/webpack.config.js",
-    "dev:examples": "node examples/server.js",
+    "dev": "node examples/server.js",
     "build": "node scripts/build.js",
     "lint": "prettier --check --write --parser typescript \"**/*.ts\"",
     "lint:fail": "prettier --check --parser typescript \"**/*.ts\"",

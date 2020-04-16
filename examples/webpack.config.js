@@ -22,7 +22,7 @@ module.exports = {
   devtool: 'inline-source-map',
 
   entry: {
-    ...buildEntry('classic')
+    ...buildEntry('composition')
   },
 
   output: {
