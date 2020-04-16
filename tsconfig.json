@@ -28,7 +28,7 @@
 
     "paths": {
       "src/*": ["src/*"],
-      "test/*": ["__test__/*"],
+      "test/*": ["__tests__/*"],
       "vuex": ["src/index"]
     },
 
