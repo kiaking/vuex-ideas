@@ -22,8 +22,9 @@ module.exports = {
   devtool: 'inline-source-map',
 
   entry: {
+    ...buildEntry('classic', 'main.js'),
     ...buildEntry('composition', 'main.js'),
-    ...buildEntry('typescript', 'main.ts')
+    ...buildEntry('composition-ts', 'main.ts')
   },
 
   output: {

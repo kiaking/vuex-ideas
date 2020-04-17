@@ -14,6 +14,7 @@ import {
   Actions,
   Modules
 } from './store'
+import { mixin } from './mixin'
 
 export interface Vuex {
   registry: Registry
@@ -43,7 +44,7 @@ export function createVuex(): Vuex {
   const registry = {} as Registry
 
   function install(app: App): void {
-    app.provide(vuexKey, vuex)
+    mixin(app, vuex)
   }
 
   /**
