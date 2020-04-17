@@ -14,6 +14,7 @@ import {
   Actions,
   Modules
 } from './store'
+import { Plugin } from './plugin'
 import { mixin } from './mixin'
 
 export interface Vuex {
@@ -32,15 +33,22 @@ export interface Vuex {
   >(
     definition: OptionDefinition<S, G, A, M>
   ): OptionStore<S, G, A, M>
+  plugins: Plugins
+}
+
+export interface Options {
+  plugins?: Plugin[]
 }
 
 export interface Registry {
   [name: string]: Store<any>
 }
 
+export type Plugins = Record<string, any>
+
 export const vuexKey = ('vuex' as unknown) as InjectionKey<Vuex>
 
-export function createVuex(): Vuex {
+export function createVuex(options: Options = {}): Vuex {
   const registry = {} as Registry
 
   function install(app: App): void {
@@ -86,7 +94,15 @@ export function createVuex(): Vuex {
     return createReactiveStore(raw(definition))
   }
 
-  const vuex = { registry, install, raw, store }
+  const plugins = {} as Plugins
+
+  const vuex = { registry, install, raw, store, plugins }
+
+  if (options.plugins) {
+    options.plugins.forEach((plugin) => {
+      plugin(vuex, (name, value) => { plugins[name] = value })
+    })
+  }
 
   return vuex
 }
@@ -156,7 +172,7 @@ function createCompositionStore<T>(
   store: CompositionStore<T>,
   setup: CompositionSetup<T>
 ): CompositionStore<T> {
-  return Object.assign(store, setup({ use: vuex.raw }))
+  return Object.assign(store, setup({ use: vuex.raw, ...vuex.plugins }))
 }
 
 function createOptionStore<
@@ -173,6 +189,8 @@ function createOptionStore<
   setup.getters && bindGetters(store, setup.getters)
   setup.actions && bindActions(store, setup.actions)
   setup.use && bindModules(vuex, store, setup.use)
+
+  bindPlugins(vuex, store)
 }
 
 function bindState<
@@ -221,6 +239,17 @@ function bindModules<
   M extends Modules
 >(vuex: Vuex, store: OptionStore<S, G, A, M>, modules: () => Modules): void {
   bindProperties(store, modules(), (module) => vuex.store(module as any))
+}
+
+function bindPlugins<
+  S extends State,
+  G extends Getters,
+  A extends Actions,
+  M extends Modules
+>(vuex: Vuex, store: OptionStore<S, G, A, M>): void {
+  for (const name in vuex.plugins) {
+    ;(store as any)[`$${name}`] = vuex.plugins[name]
+  }
 }
 
 function bindProperties<
