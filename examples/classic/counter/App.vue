@@ -1,8 +1,8 @@
 <template>
   <div class="APP">
-    <p>Count: {{ counter.count }}</p>
-    <p>Double: {{ counter.double }}</p>
-    <button @click="counter.increment">INCREMENT</button>
+    <p class="count">Count: {{ counter.count }}</p>
+    <p class="double">Double: {{ counter.double }}</p>
+    <button class="increment" @click="counter.increment">INCREMENT</button>
   </div>
 </template>
 
