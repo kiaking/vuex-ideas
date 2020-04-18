@@ -1,8 +1,8 @@
 import puppeteer from 'puppeteer'
-import { createApp, ComponentOptions } from 'vue'
+import { createApp } from 'vue'
 import { Vuex } from 'src/index'
 
-export function mount(vuex: Vuex, component: ComponentOptions) {
+export function mount(vuex: Vuex, component: any) {
   const el = createElement()
 
   component.render = () => {}
@@ -36,7 +36,7 @@ export function setupPuppeteer() {
     browser = await puppeteer.launch(puppeteerOptions)
     page = await browser.newPage()
 
-    page.on('console', e => {
+    page.on('console', (e) => {
       if (e.type() === 'error') {
         const err = e.args()[0] as any
         console.error(
@@ -60,15 +60,18 @@ export function setupPuppeteer() {
   }
 
   async function text(selector: string) {
-    return await page.$eval(selector, node => node.textContent)
+    return await page.$eval(selector, (node) => node.textContent)
   }
 
   async function value(selector: string) {
-    return await page.$eval(selector, node => (node as HTMLInputElement).value)
+    return await page.$eval(
+      selector,
+      (node) => (node as HTMLInputElement).value
+    )
   }
 
   async function html(selector: string) {
-    return await page.$eval(selector, node => node.innerHTML)
+    return await page.$eval(selector, (node) => node.innerHTML)
   }
 
   async function classList(selector: string) {
@@ -80,7 +83,7 @@ export function setupPuppeteer() {
   }
 
   async function isVisible(selector: string) {
-    const display = await page.$eval(selector, node => {
+    const display = await page.$eval(selector, (node) => {
       return window.getComputedStyle(node).display
     })
     return display !== 'none'
@@ -89,23 +92,23 @@ export function setupPuppeteer() {
   async function isChecked(selector: string) {
     return await page.$eval(
       selector,
-      node => (node as HTMLInputElement).checked
+      (node) => (node as HTMLInputElement).checked
     )
   }
 
   async function isFocused(selector: string) {
-    return await page.$eval(selector, node => node === document.activeElement)
+    return await page.$eval(selector, (node) => node === document.activeElement)
   }
 
   async function setValue(selector: string, value: string) {
     const el = (await page.$(selector))!
-    await el.evaluate(node => ((node as HTMLInputElement).value = ''))
+    await el.evaluate((node) => ((node as HTMLInputElement).value = ''))
     await el.type(value)
   }
 
   async function enterValue(selector: string, value: string) {
     const el = (await page.$(selector))!
-    await el.evaluate(node => ((node as HTMLInputElement).value = ''))
+    await el.evaluate((node) => ((node as HTMLInputElement).value = ''))
     await el.type(value)
     await el.press('Enter')
   }
@@ -113,7 +116,7 @@ export function setupPuppeteer() {
   async function clearValue(selector: string) {
     return await page.$eval(
       selector,
-      node => ((node as HTMLInputElement).value = '')
+      (node) => ((node as HTMLInputElement).value = '')
     )
   }
 

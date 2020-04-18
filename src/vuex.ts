@@ -100,7 +100,9 @@ export function createVuex(options: Options = {}): Vuex {
 
   if (options.plugins) {
     options.plugins.forEach((plugin) => {
-      plugin(vuex, (name, value) => { plugins[name] = value })
+      plugin(vuex, (name, value) => {
+        plugins[name] = value
+      })
     })
   }
 

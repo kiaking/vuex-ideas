@@ -13,12 +13,12 @@
     "coverage": "yarn test:unit --collect-coverage"
   },
   "peerDependencies": {
-    "vue": "3.0.0-beta.1"
+    "vue": "3.0.0-beta.2"
   },
   "devDependencies": {
     "@types/jest": "^25.2.1",
     "@types/puppeteer": "^2.0.1",
-    "@vue/compiler-sfc": "3.0.0-beta.1",
+    "@vue/compiler-sfc": "3.0.0-beta.2",
     "brotli": "^1.3.2",
     "chalk": "^4.0.0",
     "execa": "^4.0.0",
@@ -33,7 +33,7 @@
     "ts-jest": "^25.4.0",
     "ts-loader": "^7.0.0",
     "typescript": "^3.8.3",
-    "vue": "3.0.0-beta.1",
+    "vue": "3.0.0-beta.2",
     "vue-loader": "^16.0.0-alpha.3",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11",

@@ -1,11 +1,7 @@
 import { setupPuppeteer, E2E_TIMEOUT } from 'test/helpers'
 
 describe('e2e/counter', () => {
-  const {
-    page,
-    text,
-    click
-  } = setupPuppeteer()
+  const { page, text, click } = setupPuppeteer()
 
   async function testCounter(type: string) {
     const baseUrl = `http://localhost:8080/${type}/counter`
@@ -19,15 +15,27 @@ describe('e2e/counter', () => {
     expect(await text('.double')).toBe('Double: 4')
   }
 
-  test('classic', async () => {
-    await testCounter('classic')
-  }, E2E_TIMEOUT)
+  test(
+    'classic',
+    async () => {
+      await testCounter('classic')
+    },
+    E2E_TIMEOUT
+  )
 
-  test('composition', async () => {
-    await testCounter('composition')
-  }, E2E_TIMEOUT)
+  test(
+    'composition',
+    async () => {
+      await testCounter('composition')
+    },
+    E2E_TIMEOUT
+  )
 
-  test('composition-ts', async () => {
-    await testCounter('composition-ts')
-  }, E2E_TIMEOUT)
+  test(
+    'composition-ts',
+    async () => {
+      await testCounter('composition-ts')
+    },
+    E2E_TIMEOUT
+  )
 })
