@@ -1,6 +1,12 @@
 import { mount } from 'test/helpers'
 import { ref, defineComponent } from 'vue'
-import { createVuex, defineStore, useVuex, useStore } from 'src/index'
+import {
+  createVuex,
+  defineStore,
+  useVuex,
+  useStore,
+  mapStores
+} from 'src/index'
 
 describe('unit/vue-component', () => {
   it('can retrieve the vuex instance in setup hook', () => {
@@ -19,15 +25,26 @@ describe('unit/vue-component', () => {
   it('can retrieve a store in setup hook', () => {
     const vuex = createVuex()
 
-    const store = defineStore('store', () => {
-      return { state: ref(true) }
+    const compositionStore = defineStore('compositionStore', () => {
+      return { state: ref(1) }
+    })
+
+    const optionStore = defineStore({
+      name: 'optionStore',
+      state: () => ({
+        state: 2
+      })
     })
 
     mount(
       vuex,
       defineComponent({
         setup() {
-          expect(useStore(store).state.value).toBe(true)
+          const cs = useStore(compositionStore)
+          const os = useStore(optionStore)
+
+          expect(cs.state.value).toBe(1)
+          expect(os.state).toBe(2)
         }
       })
     )
@@ -46,24 +63,33 @@ describe('unit/vue-component', () => {
     )
   })
 
-  it('can retrieve stores by custom options', () => {
+  it('can retrieve stores by `mapStores` helper', () => {
     const vuex = createVuex()
 
-    const store = defineStore({
-      name: 'store',
-      state: () => ({ value: 1 })
+    const compositionStore = defineStore('compositionStore', () => {
+      return { state: ref(1) }
+    })
+
+    const optionStore = defineStore({
+      name: 'optionStore',
+      state: () => ({
+        state: 2
+      })
     })
 
     mount(
       vuex,
       defineComponent({
-        stores: {
-          store
+        computed: {
+          ...mapStores({
+            compositionStore,
+            optionStore
+          })
         },
 
         created() {
-          // TODO: Type this one.
-          expect((this as any).store.value).toBe(1)
+          expect(this.compositionStore.state).toBe(1)
+          expect(this.optionStore.state).toBe(2)
         }
       })
     )

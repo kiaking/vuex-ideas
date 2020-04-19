@@ -7,12 +7,10 @@
 </template>
 
 <script>
-import { useStore } from 'vuex'
+import { mapStores } from 'vuex'
 import counter from './stores/counter'
 
 export default {
-  stores: {
-    counter
-  }
+  computed: mapStores({ counter })
 }
 </script>

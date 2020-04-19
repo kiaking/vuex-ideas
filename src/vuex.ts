@@ -2,6 +2,7 @@ import { App, InjectionKey, reactive, isReactive, computed, inject } from 'vue'
 import { isFunction } from './utils'
 import {
   Store,
+  Definitions,
   CompositionStore,
   ReactiveCompositionStore,
   OptionStore,
@@ -11,28 +12,31 @@ import {
   OptionSetup,
   State,
   Getters,
-  Actions,
-  Modules
+  Actions
 } from './store'
 import { Plugin } from './plugin'
-import { mixin } from './mixin'
 
 export interface Vuex {
   registry: Registry
   install(app: App, vuex: Vuex): void
   raw<T>(definition: CompositionDefinition<T>): CompositionStore<T>
-  raw<S extends State, G extends Getters, A extends Actions, M extends Modules>(
-    definition: OptionDefinition<S, G, A, M>
-  ): OptionStore<S, G, A, M>
+  raw<
+    S extends State,
+    G extends Getters,
+    A extends Actions,
+    D extends Definitions
+  >(
+    definition: OptionDefinition<S, G, A, D>
+  ): OptionStore<S, G, A, D>
   store<T>(definition: CompositionDefinition<T>): ReactiveCompositionStore<T>
   store<
     S extends State,
     G extends Getters,
     A extends Actions,
-    M extends Modules
+    D extends Definitions
   >(
-    definition: OptionDefinition<S, G, A, M>
-  ): OptionStore<S, G, A, M>
+    definition: OptionDefinition<S, G, A, D>
+  ): OptionStore<S, G, A, D>
   plugins: Plugins
 }
 
@@ -52,7 +56,8 @@ export function createVuex(options: Options = {}): Vuex {
   const registry = {} as Registry
 
   function install(app: App): void {
-    mixin(app, vuex)
+    app.provide(vuexKey, vuex)
+    app.config.globalProperties.$vuex = vuex
   }
 
   /**
@@ -67,8 +72,8 @@ export function createVuex(options: Options = {}): Vuex {
     S extends State,
     G extends Getters,
     A extends Actions,
-    M extends Modules
-  >(definition: OptionDefinition<S, G, A, M>): OptionStore<S, G, A, M>
+    D extends Definitions
+  >(definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
 
   function raw(definition: any): any {
     return get(vuex, definition) || createStore(vuex, definition)
@@ -87,8 +92,8 @@ export function createVuex(options: Options = {}): Vuex {
     S extends State,
     G extends Getters,
     A extends Actions,
-    M extends Modules
-  >(definition: OptionDefinition<S, G, A, M>): OptionStore<S, G, A, M>
+    D extends Definitions
+  >(definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
 
   function store(definition: any): any {
     return createReactiveStore(raw(definition))
@@ -118,8 +123,8 @@ function get<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
->(vuex: Vuex, definition: OptionDefinition<S, G, A, M>): OptionStore<S, G, A, M>
+  D extends Definitions
+>(vuex: Vuex, definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
 
 function get(vuex: any, definition: any): any {
   return vuex.registry[definition.name] || null
@@ -134,8 +139,8 @@ function reserve<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
->(vuex: Vuex, definition: OptionDefinition<S, G, A, M>): OptionStore<S, G, A, M>
+  D extends Definitions
+>(vuex: Vuex, definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
 
 function reserve(vuex: any, definition: any): any {
   const { name, setup } = definition
@@ -154,8 +159,8 @@ export function createStore<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
->(vuex: Vuex, definition: OptionDefinition<S, G, A, M>): OptionStore<S, G, A, M>
+  D extends Definitions
+>(vuex: Vuex, definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
 
 export function createStore(vuex: any, definition: any): void {
   // At first, register an empty store to the registry, then update the store
@@ -181,11 +186,11 @@ function createOptionStore<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
+  D extends Definitions
 >(
   vuex: Vuex,
-  store: OptionStore<S, G, A, M>,
-  setup: OptionSetup<S, G, A, M>
+  store: OptionStore<S, G, A, D>,
+  setup: OptionSetup<S, G, A, D>
 ): void {
   setup.state && bindState(store, setup.state)
   setup.getters && bindGetters(store, setup.getters)
@@ -199,8 +204,8 @@ function bindState<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
->(store: OptionStore<S, G, A, M>, state: () => S): void {
+  D extends Definitions
+>(store: OptionStore<S, G, A, D>, state: () => S): void {
   bindProperties(store, state(), (v) => v)
 }
 
@@ -208,8 +213,8 @@ function bindGetters<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
->(store: OptionStore<S, G, A, M>, getters: G): void {
+  D extends Definitions
+>(store: OptionStore<S, G, A, D>, getters: G): void {
   bindProperties(store, getters, (getter) => {
     return (function () {
       const fn = getter
@@ -223,8 +228,8 @@ function bindActions<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
->(store: OptionStore<S, G, A, M>, actions: A): void {
+  D extends Definitions
+>(store: OptionStore<S, G, A, D>, actions: A): void {
   bindProperties(store, actions, (action) => {
     return function () {
       const fn = action
@@ -238,8 +243,12 @@ function bindModules<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
->(vuex: Vuex, store: OptionStore<S, G, A, M>, modules: () => Modules): void {
+  D extends Definitions
+>(
+  vuex: Vuex,
+  store: OptionStore<S, G, A, D>,
+  modules: () => Definitions
+): void {
   bindProperties(store, modules(), (module) => vuex.store(module as any))
 }
 
@@ -247,8 +256,8 @@ function bindPlugins<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
->(vuex: Vuex, store: OptionStore<S, G, A, M>): void {
+  D extends Definitions
+>(vuex: Vuex, store: OptionStore<S, G, A, D>): void {
   for (const name in vuex.plugins) {
     ;(store as any)[`$${name}`] = vuex.plugins[name]
   }
@@ -258,10 +267,10 @@ function bindProperties<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules,
+  D extends Definitions,
   P extends Record<string, any>
 >(
-  store: OptionStore<S, G, A, M>,
+  store: OptionStore<S, G, A, D>,
   properties: P,
   fn: (value: { [K in keyof P]: P[K] }) => any
 ): void {
@@ -278,8 +287,8 @@ export function createReactiveStore<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
->(store: OptionStore<S, G, A, M>): OptionStore<S, G, A, M>
+  D extends Definitions
+>(store: OptionStore<S, G, A, D>): OptionStore<S, G, A, D>
 
 export function createReactiveStore(store: any): any {
   return isReactive(store) ? store : reactive(store)
@@ -297,8 +306,8 @@ export function useStore<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
->(definition: OptionDefinition<S, G, A, M>): OptionStore<S, G, A, M>
+  D extends Definitions
+>(definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
 
 export function useStore(definition: any): any {
   return useVuex().raw(definition)

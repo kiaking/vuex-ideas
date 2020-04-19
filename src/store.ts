@@ -6,8 +6,8 @@ export type Store<
   S extends State = {},
   G extends Getters = {},
   A extends Actions = {},
-  M extends Modules = {}
-> = CompositionStore<T> | OptionStore<S, G, A, M>
+  D extends Definitions = {}
+> = CompositionStore<T> | OptionStore<S, G, A, D>
 
 export type CompositionStore<T> = T
 
@@ -19,16 +19,18 @@ export type OptionStore<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
-> = S & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<M>
+  D extends Definitions
+> = S & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<D>
 
 export type Definition<
   T = {},
   S extends State = {},
   G extends Getters = {},
   A extends Actions = {},
-  M extends State = {}
-> = CompositionDefinition<T> | OptionDefinition<S, G, A, M>
+  D extends Definitions = {}
+> = CompositionDefinition<T> | OptionDefinition<S, G, A, D>
+
+export type Definitions = Record<string, Definition>
 
 export interface CompositionDefinition<T> {
   name: string
@@ -39,17 +41,22 @@ export interface OptionDefinition<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
+  D extends Definitions
 > {
   name: string
-  setup: OptionSetup<S, G, A, M>
+  setup: OptionSetup<S, G, A, D>
 }
 
 export interface Context {
   use<T>(definition: CompositionDefinition<T>): CompositionStore<T>
-  use<S extends State, G extends Getters, A extends Actions, M extends Modules>(
-    definition: OptionDefinition<S, G, A, M>
-  ): OptionStore<S, G, A, M>
+  use<
+    S extends State,
+    G extends Getters,
+    A extends Actions,
+    D extends Definitions
+  >(
+    definition: OptionDefinition<S, G, A, D>
+  ): OptionStore<S, G, A, D>
 }
 
 export type CompositionSetup<T> = (context: Context) => CompositionStore<T>
@@ -58,28 +65,26 @@ export interface OptionSetup<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
+  D extends Definitions
 > {
   name: string
-  use?: () => M
+  use?: () => D
   state?: () => S
   getters?: G &
     ThisType<
-      S & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<M>
+      S & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<D>
     >
   actions?: A &
     ThisType<
-      S & A & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<M>
+      S & A & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<D>
     >
 }
 
-export type Modules = Record<string, Definition>
-
-export type StoreWithModules<M extends Modules> = {
-  [K in keyof M]: M[K] extends CompositionDefinition<any>
-    ? ReactiveCompositionStore<ReturnType<M[K]['setup']>>
-    : M[K] extends OptionDefinition<infer S, infer G, infer A, infer M>
-    ? OptionStore<S, G, A, M>
+export type StoreWithModules<D extends Definitions> = {
+  [K in keyof D]: D[K] extends CompositionDefinition<any>
+    ? ReactiveCompositionStore<ReturnType<D[K]['setup']>>
+    : D[K] extends OptionDefinition<infer S, infer G, infer A, infer D>
+    ? OptionStore<S, G, A, D>
     : never
 }
 
@@ -112,8 +117,8 @@ export function defineStore<
   S extends State,
   G extends Getters,
   A extends Actions,
-  M extends Modules
->(setup: OptionSetup<S, G, A, M>, never?: never): OptionDefinition<S, G, A, M>
+  D extends Definitions
+>(setup: OptionSetup<S, G, A, D>, never?: never): OptionDefinition<S, G, A, D>
 
 export function defineStore(maybeSetup: any, setup: any): any {
   return isString(maybeSetup)
