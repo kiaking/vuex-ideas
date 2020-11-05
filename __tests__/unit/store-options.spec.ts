@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { createVuex, defineStore } from 'src/index'
 
-describe('unit/options-store', () => {
+describe('unit/store-options', () => {
   it('gets raw options store', () => {
     const vuex = createVuex()
 
@@ -95,7 +95,7 @@ describe('unit/options-store', () => {
     expect(counter.double).toBe(4)
   })
 
-  it.only('can watch states', (done) => {
+  it('can have watcher', (done) => {
     const vuex = createVuex()
 
     const Counter = defineStore({
@@ -104,8 +104,9 @@ describe('unit/options-store', () => {
         count: 1
       }),
       watch: {
-        count(value) {
+        count(value, oldValue) {
           expect(value).toBe(2)
+          expect(oldValue).toBe(1)
           done()
         }
       },
@@ -116,11 +117,120 @@ describe('unit/options-store', () => {
       }
     })
 
-    const counter = vuex.store(Counter)
+    vuex.store(Counter).increment()
+  })
 
-    expect(counter.count).toBe(1)
+  it('can have string watcher', (done) => {
+    const vuex = createVuex()
 
-    counter.increment()
+    const Counter = defineStore({
+      name: 'counter',
+      state: () => ({
+        count: 1
+      }),
+      watch: {
+        count: 'handler'
+      },
+      actions: {
+        handler(value: number, oldValue: number) {
+          expect(value).toBe(2)
+          expect(oldValue).toBe(1)
+          done()
+        },
+
+        increment() {
+          this.count++
+        }
+      }
+    })
+
+    vuex.store(Counter).increment()
+  })
+
+  it('can have object watcher', (done) => {
+    const vuex = createVuex()
+
+    const Counter = defineStore({
+      name: 'counter',
+      state: () => ({
+        nested: {
+          value: 1
+        }
+      }),
+      watch: {
+        nested: {
+          handler(value, oldValue) {
+            expect(value.value).toBe(2)
+            expect(oldValue.value).toBe(2)
+            done()
+          },
+          deep: true
+        }
+      },
+      actions: {
+        increment() {
+          this.nested.value++
+        }
+      }
+    })
+
+    vuex.store(Counter).increment()
+  })
+
+  it('can have object watcher wirh string handler', (done) => {
+    const vuex = createVuex()
+
+    const Counter = defineStore({
+      name: 'counter',
+      state: () => ({
+        count: 1
+      }),
+      watch: {
+        count: {
+          handler: 'handler'
+        }
+      },
+      actions: {
+        handler(value: number, oldValue: number) {
+          expect(value).toBe(2)
+          expect(oldValue).toBe(1)
+          done()
+        },
+
+        increment() {
+          this.count++
+        }
+      }
+    })
+
+    vuex.store(Counter).increment()
+  })
+
+  it('can have array watcher', (done) => {
+    const vuex = createVuex()
+
+    const Counter = defineStore({
+      name: 'counter',
+      state: () => ({
+        count: 1
+      }),
+      watch: {
+        count: ['handler']
+      },
+      actions: {
+        handler(value: number, oldValue: number) {
+          expect(value).toBe(2)
+          expect(oldValue).toBe(1)
+          done()
+        },
+
+        increment() {
+          this.count++
+        }
+      }
+    })
+
+    vuex.store(Counter).increment()
   })
 
   it('can use another composition store', () => {

@@ -1,7 +1,7 @@
 import { ref, computed, watch } from 'vue'
 import { createVuex, defineStore } from 'src/index'
 
-describe('unit/composition-store', () => {
+describe('unit/store-compositions', () => {
   it('gets raw composition store', () => {
     const vuex = createVuex()
 

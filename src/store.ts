@@ -1,4 +1,4 @@
-import { UnwrapRef } from 'vue'
+import { UnwrapRef, WatchOptions, WatchCallback } from 'vue'
 import { isString } from './utils'
 
 export type Store<
@@ -70,7 +70,6 @@ export interface OptionSetup<
   name: string
   use?: () => D
   state?: () => S
-  watch?: WatchOptions
   getters?: G &
     ThisType<
       S & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<D>
@@ -79,11 +78,8 @@ export interface OptionSetup<
     ThisType<
       S & A & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<D>
     >
+  watch?: Watchers<S>
 }
-
-export type WatchOptions = Record<string, WatchOptionItem>
-
-export type WatchOptionItem<V = any, OV = any> = (value: V, oldValue: OV) => any
 
 export type StoreWithModules<D extends Definitions> = {
   [K in keyof D]: D[K] extends CompositionDefinition<any>
@@ -112,6 +108,21 @@ export type StoreWithActions<A extends Actions> = {
     ? (this: This, ...args: P) => R
     : never
 }
+
+export type Watchers<S extends State> = {
+  [K in keyof S]: Watcher<S[K], S[K]>
+}
+
+export type Watcher<V = any, OV = any> = WatchItem<V, OV> | WatchItem<V, OV>[]
+
+export type WatchItem<V = any, OV = any> =
+  | string
+  | WatchCallback<V, OV>
+  | WatchHandler<V, OV>
+
+export type WatchHandler<V = any, OV = any> = {
+  handler: string | WatchCallback<V, OV>
+} & WatchOptions
 
 export function defineStore<T>(
   name: string,

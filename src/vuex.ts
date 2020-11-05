@@ -1,5 +1,15 @@
-import { App, InjectionKey, reactive, isReactive, computed, watch, inject } from 'vue'
-import { isFunction } from './utils'
+import {
+  App,
+  reactive,
+  isReactive,
+  computed,
+  watch,
+  inject,
+  InjectionKey,
+  WatchCallback,
+  WatchOptions
+} from 'vue'
+import { isString, isFunction, isArray } from './utils'
 import {
   Store,
   Definitions,
@@ -13,7 +23,10 @@ import {
   State,
   Getters,
   Actions,
-  WatchOptions
+  Watchers,
+  Watcher,
+  WatchItem,
+  WatchHandler
 } from './store'
 import { Plugin } from './plugin'
 
@@ -278,7 +291,7 @@ function bindProperties<
   fn: (value: { [K in keyof P]: P[K] }) => any
 ): void {
   for (const name in properties) {
-    ;(store as any)[name] = fn(properties[name])
+    store[name] = fn(properties[name])
   }
 }
 
@@ -287,13 +300,93 @@ function setupWatchers<
   G extends Getters,
   A extends Actions,
   D extends Definitions
+>(store: OptionStore<S, G, A, D>, watchers: Watchers<S>): void {
+  for (const name in watchers) {
+    setupWatcher(store, name, watchers[name])
+  }
+}
+
+function setupWatcher<
+  S extends State,
+  G extends Getters,
+  A extends Actions,
+  D extends Definitions
+>(store: OptionStore<S, G, A, D>, name: string, watcher: Watcher): void {
+  if (isArray(watcher)) {
+    return setupArrayWatcher(store, name, watcher)
+  }
+
+  if (isString(watcher)) {
+    return setupStringWatcher(store, name, watcher)
+  }
+
+  if (isFunction(watcher)) {
+    return setupFunctionWatcher(store, name, watcher)
+  }
+
+  return setupObjectWatcher(store, name, watcher)
+}
+
+function setupStringWatcher<
+  S extends State,
+  G extends Getters,
+  A extends Actions,
+  D extends Definitions
 >(
   store: OptionStore<S, G, A, D>,
-  watchers: WatchOptions
+  name: string,
+  watcher: string,
+  options: WatchOptions = {}
 ): void {
-  for (const name in watchers) {
-    watch(() => store[name], watchers[name])
+  watch(
+    () => store[name],
+    (value, oldValue) => store[watcher](value, oldValue),
+    options
+  )
+}
+
+function setupFunctionWatcher<
+  S extends State,
+  G extends Getters,
+  A extends Actions,
+  D extends Definitions
+>(
+  store: OptionStore<S, G, A, D>,
+  name: string,
+  watcher: WatchCallback,
+  options: WatchOptions = {}
+): void {
+  watch(() => store[name], watcher, options)
+}
+
+function setupObjectWatcher<
+  S extends State,
+  G extends Getters,
+  A extends Actions,
+  D extends Definitions
+>(store: OptionStore<S, G, A, D>, name: string, watcher: WatchHandler): void {
+  const handler: string | WatchCallback = watcher.handler
+
+  const options: WatchOptions = {
+    immediate: watcher.immediate,
+    deep: watcher.deep,
+    flush: watcher.flush,
+    onTrack: watcher.onTrack,
+    onTrigger: watcher.onTrigger
   }
+
+  isString(handler)
+    ? setupStringWatcher(store, name, handler, options)
+    : setupFunctionWatcher(store, name, handler, options)
+}
+
+function setupArrayWatcher<
+  S extends State,
+  G extends Getters,
+  A extends Actions,
+  D extends Definitions
+>(store: OptionStore<S, G, A, D>, name: string, watcher: WatchItem[]): void {
+  watcher.forEach((w) => setupWatcher(store, name, w))
 }
 
 export function createReactiveStore<T>(
