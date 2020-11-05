@@ -1,5 +1,4 @@
-import { ref, computed } from 'vue'
-import { defineStore } from 'vuex'
+import { defineStore } from '/@vuex/'
 
 export default defineStore({
   name: 'counter',
@@ -17,6 +16,10 @@ export default defineStore({
   actions: {
     increment() {
       this.count++
+    },
+
+    decrement() {
+      this.count--
     }
   }
 })
