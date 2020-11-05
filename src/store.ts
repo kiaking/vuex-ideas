@@ -33,7 +33,7 @@ export type Definition<
 export type Definitions = Record<string, Definition>
 
 export interface CompositionDefinition<T> {
-  name: string
+  name: Name
   setup: CompositionSetup<T>
 }
 
@@ -43,20 +43,8 @@ export interface OptionDefinition<
   A extends Actions,
   D extends Definitions
 > {
-  name: string
+  name: Name
   setup: OptionSetup<S, G, A, D>
-}
-
-export interface Context {
-  use<T>(definition: CompositionDefinition<T>): CompositionStore<T>
-  use<
-    S extends State,
-    G extends Getters,
-    A extends Actions,
-    D extends Definitions
-  >(
-    definition: OptionDefinition<S, G, A, D>
-  ): OptionStore<S, G, A, D>
 }
 
 export type CompositionSetup<T> = (context: Context) => CompositionStore<T>
@@ -67,7 +55,7 @@ export interface OptionSetup<
   A extends Actions,
   D extends Definitions
 > {
-  name: string
+  name: Name
   use?: () => D
   state?: () => S
   getters?: G &
@@ -81,12 +69,18 @@ export interface OptionSetup<
   watch?: Watchers<S>
 }
 
-export type StoreWithModules<D extends Definitions> = {
-  [K in keyof D]: D[K] extends CompositionDefinition<any>
-    ? ReactiveCompositionStore<ReturnType<D[K]['setup']>>
-    : D[K] extends OptionDefinition<infer S, infer G, infer A, infer D>
-    ? OptionStore<S, G, A, D>
-    : never
+export type Name = string | Symbol
+
+export interface Context {
+  use<T>(definition: CompositionDefinition<T>): CompositionStore<T>
+  use<
+    S extends State,
+    G extends Getters,
+    A extends Actions,
+    D extends Definitions
+  >(
+    definition: OptionDefinition<S, G, A, D>
+  ): OptionStore<S, G, A, D>
 }
 
 export type State = Record<string, any>
@@ -109,6 +103,14 @@ export type StoreWithActions<A extends Actions> = {
     : never
 }
 
+export type StoreWithModules<D extends Definitions> = {
+  [K in keyof D]: D[K] extends CompositionDefinition<any>
+    ? ReactiveCompositionStore<ReturnType<D[K]['setup']>>
+    : D[K] extends OptionDefinition<infer S, infer G, infer A, infer D>
+    ? OptionStore<S, G, A, D>
+    : never
+}
+
 export type Watchers<S extends State> = {
   [K in keyof S]: Watcher<S[K], S[K]>
 }
@@ -125,7 +127,7 @@ export type WatchHandler<V = any, OV = any> = {
 } & WatchOptions
 
 export function defineStore<T>(
-  name: string,
+  name: Name,
   setup: CompositionSetup<T>
 ): CompositionDefinition<T>
 
