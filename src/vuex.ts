@@ -4,7 +4,6 @@ import {
   isReactive,
   computed,
   watch,
-  inject,
   InjectionKey,
   WatchCallback,
   WatchOptions
@@ -67,7 +66,16 @@ export type Plugins = Record<string, any>
 export const vuexKey = ('vuex' as unknown) as InjectionKey<Vuex>
 
 export function createVuex(options: Options = {}): Vuex {
-  const registry = {} as Registry
+  const vuex = newVuex()
+
+  options.plugins && installPlugins(vuex, options.plugins)
+
+  return vuex
+}
+
+function newVuex(): Vuex {
+  const registry: Registry = {}
+  const plugins: Plugins = {}
 
   function install(app: App): void {
     app.provide(vuexKey, vuex)
@@ -90,7 +98,7 @@ export function createVuex(options: Options = {}): Vuex {
   >(definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
 
   function raw(definition: any): any {
-    return get(vuex, definition) || createStore(vuex, definition)
+    return getStore(vuex, definition) || createStore(vuex, definition)
   }
 
   /**
@@ -113,50 +121,48 @@ export function createVuex(options: Options = {}): Vuex {
     return createReactiveStore(raw(definition))
   }
 
-  const plugins = {} as Plugins
-
   const vuex = { registry, install, raw, store, plugins }
-
-  if (options.plugins) {
-    options.plugins.forEach((plugin) => {
-      plugin(vuex, (name, value) => {
-        plugins[name] = value
-      })
-    })
-  }
 
   return vuex
 }
 
-function get<T>(
+function installPlugins(vuex: Vuex, plugins: Plugin[]): void {
+  plugins.forEach((plugin) => {
+    plugin(vuex, (name, value) => {
+      vuex.plugins[name] = value
+    })
+  })
+}
+
+function getStore<T>(
   vuex: Vuex,
   definition: CompositionDefinition<T>
 ): CompositionStore<T>
 
-function get<
+function getStore<
   S extends State,
   G extends Getters,
   A extends Actions,
   D extends Definitions
 >(vuex: Vuex, definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
 
-function get(vuex: any, definition: any): any {
+function getStore(vuex: any, definition: any): any {
   return vuex.registry[definition.name] || null
 }
 
-function reserve<T>(
+function reserveStore<T>(
   vuex: Vuex,
   definition: CompositionDefinition<T>
 ): CompositionStore<T>
 
-function reserve<
+function reserveStore<
   S extends State,
   G extends Getters,
   A extends Actions,
   D extends Definitions
 >(vuex: Vuex, definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
 
-function reserve(vuex: any, definition: any): any {
+function reserveStore(vuex: any, definition: any): any {
   const { name, setup } = definition
 
   vuex.registry[name] = isFunction(setup) ? {} : reactive({})
@@ -179,7 +185,7 @@ export function createStore<
 export function createStore(vuex: any, definition: any): void {
   // At first, register an empty store to the registry, then update the store
   // afterward. this is for cross-store composition.
-  const store = reserve(vuex, definition) as any
+  const store = reserveStore(vuex, definition) as any
 
   isFunction(definition.setup)
     ? createCompositionStore(vuex, store, definition.setup)
@@ -213,6 +219,21 @@ function createOptionStore<
   setup.watch && setupWatchers(store, setup.watch)
 
   bindPlugins(vuex, store)
+}
+
+export function createReactiveStore<T>(
+  store: CompositionStore<T>
+): ReactiveCompositionStore<T>
+
+export function createReactiveStore<
+  S extends State,
+  G extends Getters,
+  A extends Actions,
+  D extends Definitions
+>(store: OptionStore<S, G, A, D>): OptionStore<S, G, A, D>
+
+export function createReactiveStore(store: any): any {
+  return isReactive(store) ? store : reactive(store)
 }
 
 function bindState<
@@ -386,38 +407,4 @@ function setupArrayWatcher<
   D extends Definitions
 >(store: OptionStore<S, G, A, D>, name: string, watcher: WatchItem[]): void {
   watcher.forEach((w) => setupWatcher(store, name, w))
-}
-
-export function createReactiveStore<T>(
-  store: CompositionStore<T>
-): ReactiveCompositionStore<T>
-
-export function createReactiveStore<
-  S extends State,
-  G extends Getters,
-  A extends Actions,
-  D extends Definitions
->(store: OptionStore<S, G, A, D>): OptionStore<S, G, A, D>
-
-export function createReactiveStore(store: any): any {
-  return isReactive(store) ? store : reactive(store)
-}
-
-export function useVuex(): Vuex {
-  return inject(vuexKey)!
-}
-
-export function useStore<T>(
-  definition: CompositionDefinition<T>
-): CompositionStore<T>
-
-export function useStore<
-  S extends State,
-  G extends Getters,
-  A extends Actions,
-  D extends Definitions
->(definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
-
-export function useStore(definition: any): any {
-  return useVuex().raw(definition)
 }
