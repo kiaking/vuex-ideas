@@ -210,7 +210,6 @@ function createOptionStore<
   setup.getters && bindGetters(store, setup.getters)
   setup.actions && bindActions(store, setup.actions)
   setup.use && bindModules(vuex, store, setup.use)
-
   setup.watch && setupWatchers(store, setup.watch)
 
   bindPlugins(vuex, store)
