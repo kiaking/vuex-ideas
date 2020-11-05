@@ -1,4 +1,4 @@
-import { App, InjectionKey, reactive, isReactive, computed, inject } from 'vue'
+import { App, InjectionKey, reactive, isReactive, computed, watch, inject } from 'vue'
 import { isFunction } from './utils'
 import {
   Store,
@@ -12,7 +12,8 @@ import {
   OptionSetup,
   State,
   Getters,
-  Actions
+  Actions,
+  WatchOptions
 } from './store'
 import { Plugin } from './plugin'
 
@@ -197,6 +198,8 @@ function createOptionStore<
   setup.actions && bindActions(store, setup.actions)
   setup.use && bindModules(vuex, store, setup.use)
 
+  setup.watch && setupWatchers(store, setup.watch)
+
   bindPlugins(vuex, store)
 }
 
@@ -276,6 +279,20 @@ function bindProperties<
 ): void {
   for (const name in properties) {
     ;(store as any)[name] = fn(properties[name])
+  }
+}
+
+function setupWatchers<
+  S extends State,
+  G extends Getters,
+  A extends Actions,
+  D extends Definitions
+>(
+  store: OptionStore<S, G, A, D>,
+  watchers: WatchOptions
+): void {
+  for (const name in watchers) {
+    watch(() => store[name], watchers[name])
   }
 }
 

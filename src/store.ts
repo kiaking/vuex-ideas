@@ -70,6 +70,7 @@ export interface OptionSetup<
   name: string
   use?: () => D
   state?: () => S
+  watch?: WatchOptions
   getters?: G &
     ThisType<
       S & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<D>
@@ -79,6 +80,10 @@ export interface OptionSetup<
       S & A & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<D>
     >
 }
+
+export type WatchOptions = Record<string, WatchOptionItem>
+
+export type WatchOptionItem<V = any, OV = any> = (value: V, oldValue: OV) => any
 
 export type StoreWithModules<D extends Definitions> = {
   [K in keyof D]: D[K] extends CompositionDefinition<any>
