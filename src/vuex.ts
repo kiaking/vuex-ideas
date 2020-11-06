@@ -1,8 +1,10 @@
 import {
   App,
+  isRef,
   reactive,
   isReactive,
   computed,
+  isReadonly,
   watch,
   InjectionKey,
   WatchCallback,
@@ -17,7 +19,6 @@ import {
   OptionStore,
   CompositionDefinition,
   OptionDefinition,
-  CompositionSetup,
   OptionSetup,
   State,
   Getters,
@@ -27,9 +28,19 @@ import {
   WatchItem,
   WatchHandler
 } from './store'
+import {
+  Events,
+  createEvents,
+  fireVuexCreated,
+  fireStoreCreated,
+  fireMutation
+} from './events'
 
 export interface Vuex {
   registry: Registry
+  events: Events
+  plugins: Plugins
+  debug: boolean
   install(app: App, vuex: Vuex): void
   raw<T>(definition: CompositionDefinition<T>): CompositionStore<T>
   raw<
@@ -49,11 +60,11 @@ export interface Vuex {
   >(
     definition: OptionDefinition<S, G, A, D>
   ): OptionStore<S, G, A, D>
-  plugins: Plugins
 }
 
 export interface Options {
   plugins?: Plugin[]
+  debug?: boolean
 }
 
 export interface Registry {
@@ -71,7 +82,9 @@ export const vuexKey = ('vuex' as unknown) as InjectionKey<Vuex>
 export function createVuex(options: Options = {}): Vuex {
   const vuex = newVuex()
 
-  options.plugins && installPlugins(vuex, options.plugins)
+  setupOptions(vuex, options)
+
+  fire(vuex, () => fireVuexCreated(vuex))
 
   return vuex
 }
@@ -79,6 +92,8 @@ export function createVuex(options: Options = {}): Vuex {
 function newVuex(): Vuex {
   const registry: Registry = {}
   const plugins: Plugins = {}
+  const debug: boolean = __DEV__
+  const events: Events = createEvents()
 
   function install(app: App): void {
     app.provide(vuexKey, vuex)
@@ -124,9 +139,21 @@ function newVuex(): Vuex {
     return createReactiveStore(raw(definition))
   }
 
-  const vuex = { registry, install, raw, store, plugins }
+  const vuex = { registry, events, install, raw, store, plugins, debug }
 
   return vuex
+}
+
+function setupOptions(vuex: Vuex, options: Options = {}): void {
+  const { plugins, debug } = options
+
+  if (debug) {
+    vuex.debug = debug
+  }
+
+  if (plugins) {
+    installPlugins(vuex, plugins)
+  }
 }
 
 function installPlugins(vuex: Vuex, plugins: Plugin[]): void {
@@ -191,8 +218,10 @@ export function createStore(vuex: any, definition: any): void {
   const store = reserveStore(vuex, definition) as any
 
   isFunction(definition.setup)
-    ? createCompositionStore(vuex, store, definition.setup)
+    ? createCompositionStore(vuex, store, definition)
     : createOptionStore(vuex, store, definition.setup)
+
+  fire(vuex, () => fireStoreCreated(vuex, store))
 
   return store
 }
@@ -200,9 +229,25 @@ export function createStore(vuex: any, definition: any): void {
 function createCompositionStore<T>(
   vuex: Vuex,
   store: CompositionStore<T>,
-  setup: CompositionSetup<T>
+  definition: CompositionDefinition<T>
 ): CompositionStore<T> {
-  return Object.assign(store, setup({ use: vuex.raw, ...vuex.plugins }))
+  const s = definition.setup({ use: vuex.raw, ...vuex.plugins })
+
+  for (const key in s) {
+    const value = s[key]
+
+    if (isReadonly(value)) {
+      continue
+    }
+
+    if (isRef(value)) {
+      watch(value, (v) => {
+        fire(vuex, () => fireMutation(vuex, definition.name, key, v))
+      })
+    }
+  }
+
+  return Object.assign(store, s)
 }
 
 function createOptionStore<
@@ -410,4 +455,13 @@ function setupArrayWatcher<
   D extends Definitions
 >(store: OptionStore<S, G, A, D>, name: string, watcher: WatchItem[]): void {
   watcher.forEach((w) => setupWatcher(store, name, w))
+}
+
+/**
+ * Fire the given callback unless the debug option is set to `true`. This
+ * method should be used whenever we want to fire an event to prevent
+ * unnecessary event calls.
+ */
+function fire(vuex: Vuex, callback: Function): void {
+  vuex.debug && callback()
 }

@@ -8,8 +8,9 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
     "baseUrl": ".",
-    "rootDir": ".",
+    "rootDir": "../../..",
     "outDir": "dist",
     "declaration": true,
     "sourceMap": true,
@@ -27,18 +28,12 @@
     ],
 
     "paths": {
-      "src/*": ["src/*"],
-      "test/*": ["__tests__/*"],
-      "vuex": ["src/index"]
-    },
-
-    "types": [
-      "jest"
-    ]
+      "/@vuex/": ["../../../src"]
+    }
   },
 
   "include": [
     "src",
-    "__tests__"
+    "vite.config.ts"
   ]
 }

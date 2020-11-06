@@ -1,3 +1,4 @@
+import replace from '@rollup/plugin-replace'
 import ts from 'rollup-plugin-typescript2'
 import { terser } from 'rollup-plugin-terser'
 import pkg from './package.json'
@@ -40,6 +41,12 @@ function createEntry(config) {
   if (config.format === 'iife') {
     c.output.name = 'Vuex'
   }
+
+  c.plugins.push(replace({
+    __DEV__: config.format !== 'iife' && !config.browser
+      ? `(process.env.NODE_ENV !== 'production')`
+      : config.env !== 'production'
+  }))
 
   c.plugins.push(ts({
     check: config.format === 'es' && config.browser && config.env === 'development',

@@ -1,6 +1,9 @@
 module.exports = {
   preset: 'ts-jest',
   rootDir: __dirname,
+  globals: {
+    __DEV__: true
+  },
   moduleFileExtensions: ['js', 'ts'],
   testMatch: ['<rootDir>__tests__/**/*spec.ts'],
   watchPathIgnorePatterns: ['/node_modules/'],
