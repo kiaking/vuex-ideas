@@ -8,7 +8,7 @@
     "lint": "prettier --check --write --parser typescript \"**/*.ts\"",
     "lint:fail": "prettier --check --parser typescript \"**/*.ts\"",
     "test": "yarn test:unit && yarn test:e2e",
-    "test:unit": "jest __tests__/unit --forceExit --detectOpenHandles",
+    "test:unit": "jest --testPathIgnorePatterns __tests__/e2e --forceExit --detectOpenHandles",
     "test:e2e": "start-server-and-test dev http://localhost:8080 'jest __tests__/e2e --forceExit --detectOpenHandles'",
     "coverage": "yarn test:unit --collect-coverage"
   },

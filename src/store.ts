@@ -1,5 +1,6 @@
 import { UnwrapRef, WatchOptions, WatchCallback } from 'vue'
 import { isString } from './utils'
+import { StateTree, SerializedStateTree } from './revive'
 
 export type Store<
   T = {},
@@ -9,7 +10,10 @@ export type Store<
   D extends Definitions = {}
 > = CompositionStore<T> | OptionStore<S, G, A, D>
 
-export type CompositionStore<T> = T
+export type CompositionStore<T> = T & {
+  $state(): StateTree
+  $serialize(): SerializedStateTree
+}
 
 export type ReactiveCompositionStore<T> = {
   [P in keyof T]: UnwrapRef<T[P]>
@@ -47,7 +51,7 @@ export interface OptionDefinition<
   setup: OptionSetup<S, G, A, D>
 }
 
-export type CompositionSetup<T> = (context: Context) => CompositionStore<T>
+export type CompositionSetup<T> = (context: Context) => T
 
 export interface OptionSetup<
   S extends State,

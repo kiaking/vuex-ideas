@@ -15,12 +15,15 @@ import {
   WatchItem,
   WatchHandler
 } from './store'
+import { serialize } from './revive'
 
 export function setupCompositionStore<T>(
   vuex: Vuex,
   store: CompositionStore<T>,
   setup: CompositionSetup<T>
 ): void {
+  store.$serialize = () => serialize(store)
+
   Object.assign(store, setup({ use: vuex.raw, ...vuex.plugins }))
 }
 
