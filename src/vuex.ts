@@ -6,6 +6,7 @@ import {
   computed,
   isReadonly,
   watch,
+  watchEffect,
   InjectionKey,
   WatchCallback,
   WatchOptions
@@ -35,6 +36,7 @@ import {
   fireStoreCreated,
   fireMutation
 } from './events'
+import * as StackTrace from './stack-trace'
 
 export interface Vuex {
   registry: Registry
@@ -241,8 +243,11 @@ function createCompositionStore<T>(
     }
 
     if (isRef(value)) {
-      watch(value, (v) => {
-        fire(vuex, () => fireMutation(vuex, definition.name, key, v))
+      watchEffect(() => value.value, {
+        onTrigger() {
+          const stack = StackTrace.get().slice(6)
+          fire(vuex, () => fireMutation(vuex, definition.name, key, value.value, stack))
+        }
       })
     }
   }

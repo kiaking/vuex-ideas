@@ -5,12 +5,10 @@
       <p class="state">Double: {{ counter.double.value }}</p>
     </div>
     <div class="actions">
-      <button class="action" @click="counter.increment">INCREMENT</button>
-      <button class="action" @click="counter.decrement">DECREMENT</button>
+      <button class="action" @click="inc">INCREMENT</button>
+      <button class="action" @click="dec">DECREMENT</button>
     </div>
     <div class="debug">
-      <button @click="debug">DEBUG</button>
-
       <pre>{{ data }}</pre>
     </div>
   </div>
@@ -30,12 +28,21 @@ export default defineComponent({
 
     const data = ref(vuex.$history)
 
-    function debug() {}
-
     return {
       counter,
       data,
-      debug
+      // inc: () => counter.increment(),
+      // dec: () => counter.decrement()
+    }
+  },
+
+  methods: {
+    inc () {
+      this.counter.increment()
+    },
+
+    dec () {
+      this.counter.decrement()
     }
   }
 })

@@ -1,4 +1,4 @@
-import { Vuex, Plugin, EventTypes } from '../../'
+import { Vuex, Plugin, EventTypes, StackFrame } from '../../'
 import { LogType, Log, createLog } from './log'
 
 export interface History {
@@ -44,7 +44,7 @@ function createHistory(): History {
 function setupHistory(history: History, vuex: Vuex): void {
   vuex.events.on(EventTypes.VuexCreated, () => handleVuexCreated(history))
   vuex.events.on(EventTypes.StoreCreated, () => handleStoreCreated(history))
-  vuex.events.on(EventTypes.Mutation, (store, state, value) => handleMutation(history, store, state, value))
+  vuex.events.on(EventTypes.Mutation, (store, state, value, stack) => handleMutation(history, store, state, value, stack))
 }
 
 function pushLog(history: History, log: Log): void {
@@ -67,12 +67,13 @@ function handleStoreCreated(history: History): void {
   pushLog(history, log)
 }
 
-function handleMutation(history: History, store: string, state: string, value: any): void {
+function handleMutation(history: History, store: string | Symbol, state: string, value: any, stack: StackFrame[]): void {
   const log = createLog(LogType.Mutation, {
     message: 'State mutated.',
     store,
     state,
-    value
+    value,
+    stack
   })
 
   pushLog(history, log)

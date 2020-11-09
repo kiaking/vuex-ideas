@@ -1,5 +1,6 @@
 import { Vuex } from './vuex'
 import { Store } from './store'
+import { StackFrame } from './stack-trace'
 
 export interface Events {
   listerners: EventListeners
@@ -27,7 +28,7 @@ export type EventCallback<T extends EventTypes> = EventCallbacks[T]
 
 export type EventVuexCreatedCallback = (vuex: Vuex) => void
 export type EventStoreCreatedCallback = (vuex: Vuex, store: Store) => void
-export type EventMutationCallback = (store: string | Symbol, state: string, value: any) => void
+export type EventMutationCallback = (store: string | Symbol, state: string, value: any, stack: StackFrame[]) => void
 
 export type EventCallbackArgs<T extends EventTypes> = EventCallback<T> extends (...args: infer A) => any ? A : never
 
@@ -65,6 +66,6 @@ export function fireStoreCreated(vuex: Vuex, store: Store): void {
   vuex.events.emit(EventTypes.StoreCreated, vuex, store)
 }
 
-export function fireMutation(vuex: Vuex, store: string | Symbol, state: string, value: any): void {
-  vuex.events.emit(EventTypes.Mutation, store, state, value)
+export function fireMutation(vuex: Vuex, store: string | Symbol, state: string, value: any, stack: StackFrame[]): void {
+  vuex.events.emit(EventTypes.Mutation, store, state, value, stack)
 }

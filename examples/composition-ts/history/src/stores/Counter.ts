@@ -1,6 +1,12 @@
 import { ref, computed } from 'vue'
 import { defineStore } from '/@vuex/'
 
+function sleep () {
+  return new Promise((resolve) => {
+    setTimeout(resolve, 1000)
+  })
+}
+
 export default defineStore('counter', () => {
   const count = ref(1)
 
