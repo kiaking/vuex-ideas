@@ -188,7 +188,7 @@ function createOptionStore<
 >(
   vuex: Vuex,
   store: OptionStore<S, G, A, D>,
-  definition:OptionDefinition<S, G, A, D>
+  definition: OptionDefinition<S, G, A, D>
 ): void {
   setupOptionStore(vuex, store, definition)
 }
