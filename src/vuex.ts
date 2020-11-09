@@ -27,6 +27,7 @@ import {
   WatchItem,
   WatchHandler
 } from './store'
+import { Plugin, installPlugins } from './plugin'
 
 export interface Vuex {
   registry: Registry
@@ -60,11 +61,7 @@ export interface Registry {
   [name: string]: Store<any>
 }
 
-export type Plugin = (vuex: Vuex, provide: Provide) => void
-
-export type Plugins = Record<string, any>
-
-export type Provide = (name: string, value: any) => void
+type Plugins = Record<string, any>
 
 export const vuexKey = ('vuex' as unknown) as InjectionKey<Vuex>
 
@@ -127,14 +124,6 @@ function newVuex(): Vuex {
   const vuex = { registry, install, raw, store, plugins }
 
   return vuex
-}
-
-function installPlugins(vuex: Vuex, plugins: Plugin[]): void {
-  plugins.forEach((plugin) => {
-    plugin(vuex, (name, value) => {
-      vuex.plugins[name] = value
-    })
-  })
 }
 
 function getStore<T>(
