@@ -64,3 +64,13 @@ function serializeObject(value: object): SerializedState {
 function serializeRef(value: Ref): SerializedState {
   return { isRef: true, value: value.value }
 }
+
+export function revive(state: StateTree, tree: SerializedStateTree): void {
+  for (const key in tree) {
+    const value = tree[key]
+
+    if (value.isRef) {
+      state[key].value = value.value
+    }
+  }
+}

@@ -61,4 +61,24 @@ describe('unit/revive', () => {
 
     expect(state).toEqual(expected)
   })
+
+  it('can serialize the given store state tree', () => {
+    const vuex = createVuex()
+
+    const Counter = defineStore('counter', () => {
+      const valueRef = ref(1)
+
+      return { valueRef }
+    })
+
+    const state = {
+      valueRef: { isRef: true, value: 2 }
+    }
+
+    const counter = vuex.raw(Counter)
+
+    counter.$revive(state)
+
+    expect(counter.valueRef.value).toEqual(2)
+  })
 })

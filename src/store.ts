@@ -1,6 +1,6 @@
 import { UnwrapRef, WatchOptions, WatchCallback } from 'vue'
 import { isString } from './utils'
-import { StateTree, SerializedStateTree } from './revive'
+import { SerializedStateTree } from './revive'
 
 export type Store<
   T = {},
@@ -11,8 +11,8 @@ export type Store<
 > = CompositionStore<T> | OptionStore<S, G, A, D>
 
 export type CompositionStore<T> = T & {
-  $state(): StateTree
   $serialize(): SerializedStateTree
+  $revive(tree: SerializedStateTree): void
 }
 
 export type ReactiveCompositionStore<T> = {
