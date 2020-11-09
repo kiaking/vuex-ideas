@@ -1,3 +1,7 @@
+export function isNull(value: any): value is null {
+  return value === null
+}
+
 export function isString(value: any): value is string {
   return typeof value === 'string'
 }
@@ -11,5 +15,5 @@ export function isArray(value: any): value is any[] {
 }
 
 export function isObject(value: any): value is object {
-  return !isArray(value) && typeof value === 'object'
+  return typeof value === 'object' && !isArray(value) && !isNull(value)
 }
