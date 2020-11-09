@@ -22,6 +22,8 @@ export type OptionStore<
   D extends Definitions
 > = S & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<D>
 
+export type Definitions = Record<string, Definition>
+
 export type Definition<
   T = {},
   S extends State = {},
@@ -30,7 +32,7 @@ export type Definition<
   D extends Definitions = {}
 > = CompositionDefinition<T> | OptionDefinition<S, G, A, D>
 
-export type Definitions = Record<string, Definition>
+export type Name = string | Symbol
 
 export interface BaseDefinition {
   name: Name
@@ -40,17 +42,28 @@ export interface CompositionDefinition<T> extends BaseDefinition {
   setup: CompositionSetup<T>
 }
 
+export type CompositionSetup<T> = (context: Context) => CompositionStore<T>
+
+export interface Context {
+  use<T>(definition: CompositionDefinition<T>): CompositionStore<T>
+  use<
+    S extends State,
+    G extends Getters,
+    A extends Actions,
+    D extends Definitions
+  >(
+    definition: OptionDefinition<S, G, A, D>
+  ): OptionStore<S, G, A, D>
+}
+
 export interface OptionDefinition<
   S extends State,
   G extends Getters,
   A extends Actions,
   D extends Definitions
 > extends BaseDefinition {
-  name: Name
   setup: OptionSetup<S, G, A, D>
 }
-
-export type CompositionSetup<T> = (context: Context) => CompositionStore<T>
 
 export interface OptionSetup<
   S extends State,
@@ -70,20 +83,6 @@ export interface OptionSetup<
       S & A & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<D>
     >
   watch?: Watchers<S>
-}
-
-export type Name = string | Symbol
-
-export interface Context {
-  use<T>(definition: CompositionDefinition<T>): CompositionStore<T>
-  use<
-    S extends State,
-    G extends Getters,
-    A extends Actions,
-    D extends Definitions
-  >(
-    definition: OptionDefinition<S, G, A, D>
-  ): OptionStore<S, G, A, D>
 }
 
 export type State = Record<string, any>
