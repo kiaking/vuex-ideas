@@ -32,8 +32,11 @@ export type Definition<
 
 export type Definitions = Record<string, Definition>
 
-export interface CompositionDefinition<T> {
+export interface BaseDefinition {
   name: Name
+}
+
+export interface CompositionDefinition<T> extends BaseDefinition {
   setup: CompositionSetup<T>
 }
 
@@ -42,7 +45,7 @@ export interface OptionDefinition<
   G extends Getters,
   A extends Actions,
   D extends Definitions
-> {
+> extends BaseDefinition {
   name: Name
   setup: OptionSetup<S, G, A, D>
 }
