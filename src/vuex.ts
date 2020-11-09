@@ -19,6 +19,7 @@ import { Plugin, installPlugins } from './plugin'
 
 export interface Vuex {
   registry: Registry
+  plugins: Plugins
   install(app: App, vuex: Vuex): void
   raw<T>(definition: CompositionDefinition<T>): CompositionStore<T>
   raw<
@@ -38,7 +39,6 @@ export interface Vuex {
   >(
     definition: OptionDefinition<S, G, A, D>
   ): OptionStore<S, G, A, D>
-  plugins: Plugins
 }
 
 export interface Options {
@@ -49,7 +49,7 @@ export interface Registry {
   [name: string]: Store<any>
 }
 
-type Plugins = Record<string, any>
+export type Plugins = Record<string, any>
 
 export const vuexKey = ('vuex' as unknown) as InjectionKey<Vuex>
 
