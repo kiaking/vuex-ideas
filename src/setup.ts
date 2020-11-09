@@ -4,9 +4,9 @@ import { Vuex } from './vuex'
 import {
   Definitions,
   CompositionStore,
-  CompositionSetup,
+  CompositionDefinition,
   OptionStore,
-  OptionSetup,
+  OptionDefinition,
   State,
   Getters,
   Actions,
@@ -19,9 +19,9 @@ import {
 export function setupCompositionStore<T>(
   vuex: Vuex,
   store: CompositionStore<T>,
-  setup: CompositionSetup<T>
+  definition: CompositionDefinition<T>
 ): void {
-  Object.assign(store, setup({ use: vuex.raw, ...vuex.plugins }))
+  Object.assign(store, definition.setup({ use: vuex.raw, ...vuex.plugins }))
 }
 
 export function setupOptionStore<
@@ -32,13 +32,13 @@ export function setupOptionStore<
 >(
   vuex: Vuex,
   store: OptionStore<S, G, A, D>,
-  setup: OptionSetup<S, G, A, D>
+  definition: OptionDefinition<S, G, A, D>
 ): void {
-  setup.state && bindState(store, setup.state)
-  setup.getters && bindGetters(store, setup.getters)
-  setup.actions && bindActions(store, setup.actions)
-  setup.use && bindModules(vuex, store, setup.use)
-  setup.watch && setupWatchers(store, setup.watch)
+  definition.setup.state && bindState(store, definition.setup.state)
+  definition.setup.getters && bindGetters(store, definition.setup.getters)
+  definition.setup.actions && bindActions(store, definition.setup.actions)
+  definition.setup.use && bindModules(vuex, store, definition.setup.use)
+  definition.setup.watch && setupWatchers(store, definition.setup.watch)
 
   bindPlugins(vuex, store)
 }

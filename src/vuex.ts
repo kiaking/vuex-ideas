@@ -8,8 +8,6 @@ import {
   OptionStore,
   CompositionDefinition,
   OptionDefinition,
-  CompositionSetup,
-  OptionSetup,
   State,
   Getters,
   Actions
@@ -168,8 +166,8 @@ export function createStore(vuex: any, definition: any): void {
   const store = reserveStore(vuex, definition) as any
 
   isFunction(definition.setup)
-    ? createCompositionStore(vuex, store, definition.setup)
-    : createOptionStore(vuex, store, definition.setup)
+    ? createCompositionStore(vuex, store, definition)
+    : createOptionStore(vuex, store, definition)
 
   return store
 }
@@ -177,9 +175,9 @@ export function createStore(vuex: any, definition: any): void {
 function createCompositionStore<T>(
   vuex: Vuex,
   store: CompositionStore<T>,
-  setup: CompositionSetup<T>
+  definition: CompositionDefinition<T>
 ): void {
-  setupCompositionStore(vuex, store, setup)
+  setupCompositionStore(vuex, store, definition)
 }
 
 function createOptionStore<
@@ -190,9 +188,9 @@ function createOptionStore<
 >(
   vuex: Vuex,
   store: OptionStore<S, G, A, D>,
-  setup: OptionSetup<S, G, A, D>
+  definition:OptionDefinition<S, G, A, D>
 ): void {
-  setupOptionStore(vuex, store, setup)
+  setupOptionStore(vuex, store, definition)
 }
 
 export function createReactiveStore<T>(
