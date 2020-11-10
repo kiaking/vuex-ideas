@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import { defineStore } from 'vuex'
+import { defineStore } from '/@vuex/'
 
 export default defineStore('counter', () => {
   const count = ref(1)
@@ -10,9 +10,14 @@ export default defineStore('counter', () => {
     count.value++
   }
 
+  function decrement() {
+    count.value--
+  }
+
   return {
     count,
     double,
-    increment
+    increment,
+    decrement
   }
 })

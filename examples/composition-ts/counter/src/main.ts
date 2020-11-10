@@ -1,5 +1,7 @@
+import './index.css'
+
 import { createApp } from 'vue'
-import { createVuex } from 'vuex'
+import { createVuex } from '/@vuex/'
 import App from './App.vue'
 
 const app = createApp(App)
