@@ -1,10 +1,11 @@
-import { computed, watch, WatchCallback, WatchOptions } from 'vue'
+import { reactive, isReactive, computed, watch, WatchCallback, WatchOptions } from 'vue'
 import { isString, isFunction, isArray } from './utils'
-import { Vuex } from './vuex'
+import { Vuex, Registry } from './vuex'
 import {
   Definitions,
   CompositionStore,
   CompositionDefinition,
+  ReactiveCompositionStore,
   OptionStore,
   OptionDefinition,
   State,
@@ -15,13 +16,18 @@ import {
   WatchItem,
   WatchHandler
 } from './store'
+import * as Marshal from './marshal'
 
 export function setupCompositionStore<T>(
   vuex: Vuex,
-  store: CompositionStore<T>,
+  registry: Registry,
   definition: CompositionDefinition<T>
 ): void {
-  Object.assign(store, definition.setup({ use: vuex.raw, ...vuex.plugins }))
+  const state = definition.setup({ use: vuex.raw, ...vuex.plugins })
+
+  Object.assign(registry.store, state)
+
+  hydrateRegistry(registry)
 }
 
 export function setupOptionStore<
@@ -31,10 +37,19 @@ export function setupOptionStore<
   D extends Definitions
 >(
   vuex: Vuex,
-  store: OptionStore<S, G, A, D>,
+  registry: Registry,
   definition: OptionDefinition<S, G, A, D>
 ): void {
+  const store = registry.store! as OptionStore<S, G, A, D>
+
   definition.setup.state && bindState(store, definition.setup.state)
+
+  // If an initial state is set to the registry, we'll hydrate the state here
+  // before binding any other properties such as getters and actions. This way,
+  // we can avoid any side effects from being performed, for example,
+  // watcher callbacks.
+  hydrateRegistry(registry)
+
   definition.setup.getters && bindGetters(store, definition.setup.getters)
   definition.setup.actions && bindActions(store, definition.setup.actions)
   definition.setup.use && bindModules(vuex, store, definition.setup.use)
@@ -214,4 +229,29 @@ function setupArrayWatcher<
   D extends Definitions
 >(store: OptionStore<S, G, A, D>, name: string, watcher: WatchItem[]): void {
   watcher.forEach((w) => setupWatcher(store, name, w))
+}
+
+export function setupReactiveStore<T>(
+  store: CompositionStore<T>
+): ReactiveCompositionStore<T>
+
+export function setupReactiveStore<
+  S extends State,
+  G extends Getters,
+  A extends Actions,
+  D extends Definitions
+>(store: OptionStore<S, G, A, D>): OptionStore<S, G, A, D>
+
+export function setupReactiveStore(store: any): any {
+  return isReactive(store) ? store : reactive(store)
+}
+
+function hydrateRegistry(registry: Registry): void {
+  if (!registry.initialState) {
+    return
+  }
+
+  Marshal.hydrate(registry.store!, registry.initialState)
+
+  registry.initialState = null
 }
