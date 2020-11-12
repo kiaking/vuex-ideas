@@ -1,5 +1,6 @@
 import { App, reactive, InjectionKey } from 'vue'
 import { isFunction } from './utils'
+import * as Marshal from './marshal'
 import {
   Store,
   Definitions,
@@ -12,9 +13,12 @@ import {
   Getters,
   Actions
 } from './store'
-import { setupCompositionStore, setupOptionStore, setupReactiveStore } from './setup'
+import {
+  setupCompositionStore,
+  setupOptionStore,
+  setupReactiveStore
+} from './setup'
 import { Plugin, installPlugins } from './plugin'
-import * as Marshal from './marshal'
 
 export interface Vuex {
   registries: Registries
@@ -207,7 +211,10 @@ function reserveRegistry(vuex: any, definition: any): any {
   return registries[name]
 }
 
-function performReplaceAllStates(vuex: Vuex, states: Record<string, State>): void {
+function performReplaceAllStates(
+  vuex: Vuex,
+  states: Record<string, State>
+): void {
   for (const name in states) {
     performReplaceState(vuex, name, states[name])
   }

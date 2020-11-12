@@ -1,5 +1,13 @@
-import { reactive, isReactive, computed, watch, WatchCallback, WatchOptions } from 'vue'
+import {
+  reactive,
+  isReactive,
+  computed,
+  watch,
+  WatchCallback,
+  WatchOptions
+} from 'vue'
 import { isString, isFunction, isArray } from './utils'
+import * as Marshal from './marshal'
 import { Vuex, Registry } from './vuex'
 import {
   Definitions,
@@ -16,7 +24,6 @@ import {
   WatchItem,
   WatchHandler
 } from './store'
-import * as Marshal from './marshal'
 
 export function setupCompositionStore<T>(
   vuex: Vuex,

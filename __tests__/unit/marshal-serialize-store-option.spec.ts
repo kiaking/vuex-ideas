@@ -1,33 +1,39 @@
-import { createVuex, defineStore, State } from 'src/index'
+import {
+  createVuex,
+  defineStore,
+  Definitions,
+  OptionDefinition,
+  State,
+  Getters,
+  Actions
+} from 'src/index'
 
-type Pattern = [State, State]
-
-;describe('unit/marshal-serialize-store-option', () => {
+describe('unit/marshal-serialize-store-option', () => {
   it('can serialize states', () => {
-    const patterns: Pattern[] = [
-      [
-        { str: 'a', num: 1, bool: false, n: null },
-        { str: 'a', num: 1, bool: false, n: null }
-      ]
-    ]
+    const Store = defineStore({
+      name: 'store',
+      state: () => ({ str: 'a', num: 1, bool: false, n: null })
+    })
 
-    patterns.forEach(check)
+    const expected = {
+      store: { str: 'a', num: 1, bool: false, n: null }
+    }
+
+    check(Store, expected)
   })
 })
 
-function check(pattern: Pattern) {
+function check<
+  S extends State,
+  G extends Getters,
+  A extends Actions,
+  D extends Definitions
+>(definition: OptionDefinition<S, G, A, D>, expected: State) {
   const vuex = createVuex()
 
-  const Store = defineStore({
-    name: 'store',
-    state: () => pattern[0]
-  })
-
-  vuex.raw(Store)
+  vuex.raw(definition)
 
   const serializedState = vuex.serialize()
-
-  const expected = { store: pattern[1] }
 
   expect(serializedState).toEqual(expected)
 }
