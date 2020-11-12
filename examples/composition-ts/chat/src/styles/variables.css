@@ -1,0 +1,42 @@
+:root {
+  --c-white: #ffffff;
+
+  --c-black: #282c34;
+  --c-black-deep: #181a1f;
+
+  --c-bg: var(--c-white);
+  --c-bg-inverse: var(--c-black);
+  --c-bg-deep-inverse: var(--c-black-deep);
+
+  --c-text-light-1: var(--c-black);
+  --c-text-light-2: rgba(40, 44, 52, .6);
+  --c-text-light-3: rgba(40, 44, 52, .3);
+  --c-text-light-4: rgba(40, 44, 52, .18);
+
+  --c-text-dark-1: var(--c-white);
+  --c-text-dark-2: rgba(255, 255, 255, .6);
+  --c-text-dark-3: rgba(255, 255, 255, .3);
+  --c-text-dark-4: rgba(255, 255, 255, .18);
+
+  --c-text-1: var(--c-text-light-1);
+  --c-text-2: var(--c-text-light-2);
+  --c-text-3: var(--c-text-light-3);
+  --c-text-4: var(--c-text-light-4);
+
+  --c-text-1-inverse: var(--c-text-dark-1);
+  --c-text-2-inverse: var(--c-text-dark-2);
+  --c-text-3-inverse: var(--c-text-dark-3);
+  --c-text-4-inverse: var(--c-text-dark-4);
+
+  --c-divider-light: rgba(60, 60, 67, .29);
+  --c-divider-lighter: rgba(60, 60, 67, .12);
+
+  --c-divider-dark: rgba(84, 84, 88, .65);
+  --c-divider-darker: rgba(84, 84, 88, .65);
+
+  --c-divider: var(--c-divider-light);
+
+  --c-divider-inverse: var(--c-divider-dark);
+
+  --c-brand: #3eaf7c;
+}

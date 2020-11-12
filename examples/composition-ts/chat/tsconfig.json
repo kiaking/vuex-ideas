@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "strict": true,
+    "allowJs": true,
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "rootDir": "../../..",
+    "outDir": "dist",
+    "declaration": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strictNullChecks": true,
+
+    "lib": [
+      "esnext",
+      "dom"
+    ],
+
+    "paths": {
+      "/@/*": ["./src/*"],
+      "/@vuex/": ["../../../src"]
+    }
+  },
+
+  "include": [
+    "src",
+    "vite.config.ts"
+  ]
+}
