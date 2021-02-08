@@ -1,86 +1,78 @@
-import { UnwrapRef, WatchOptions, WatchCallback } from 'vue'
+import {
+  Ref,
+  UnwrapRef,
+  WatchOptions,
+  WatchCallback,
+  getCurrentInstance,
+  inject
+} from 'vue'
 import { isString } from './utils'
+import { Vuex, key } from './vuex'
+import { setActiveInstance, getActiveInstance } from './container'
 
 export type Store<
   T = {},
   S extends State = {},
   G extends Getters = {},
   A extends Actions = {},
-  D extends Definitions = {}
-> = CompositionStore<T> | OptionStore<S, G, A, D>
+  B extends Builds = {}
+> = CompositionStore<T> | OptionStore<S, G, A, B>
 
-export type CompositionStore<T> = T
-
-export type ReactiveCompositionStore<T> = {
-  [P in keyof T]: UnwrapRef<T[P]>
-}
+export type CompositionStore<T> = T extends Ref ? T : UnwrapRef<T>
 
 export type OptionStore<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
-> = S & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<D>
+  B extends Builds
+> = S & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<B>
 
-export type Definitions = Record<string, Definition>
+export type Builds = Record<string, Build>
+export type Build<T = any> = (vuex?: Vuex) => T
 
 export type Definition<
   T = {},
   S extends State = {},
   G extends Getters = {},
   A extends Actions = {},
-  D extends Definitions = {}
-> = CompositionDefinition<T> | OptionDefinition<S, G, A, D>
+  B extends Builds = {}
+> = CompositionDefinition<T> | OptionDefinition<S, G, A, B>
 
-export type Name = string | Symbol
-
-export interface BaseDefinition {
-  name: Name
-}
-
-export interface CompositionDefinition<T> extends BaseDefinition {
+export interface CompositionDefinition<T> {
+  key: string
   setup: CompositionSetup<T>
 }
 
-export type CompositionSetup<T> = (context: Context) => CompositionStore<T>
+export type CompositionSetup<T> = (context: CompositionContext) => T
 
-export interface Context {
-  use<T>(definition: CompositionDefinition<T>): CompositionStore<T>
-  use<
-    S extends State,
-    G extends Getters,
-    A extends Actions,
-    D extends Definitions
-  >(
-    definition: OptionDefinition<S, G, A, D>
-  ): OptionStore<S, G, A, D>
-}
+export interface CompositionContext {}
 
 export interface OptionDefinition<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
-> extends BaseDefinition {
-  setup: OptionSetup<S, G, A, D>
+  B extends Builds
+> {
+  key: string
+  setup: OptionSetup<S, G, A, B>
 }
 
 export interface OptionSetup<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
+  B extends Builds
 > {
-  name: Name
-  use?: () => D
+  key: string
+  use?: () => B
   state?: () => S
   getters?: G &
     ThisType<
-      S & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<D>
+      S & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<B>
     >
   actions?: A &
     ThisType<
-      S & A & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<D>
+      S & A & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<B>
     >
   watch?: Watchers<S>
 }
@@ -105,12 +97,8 @@ export type StoreWithActions<A extends Actions> = {
     : never
 }
 
-export type StoreWithModules<D extends Definitions> = {
-  [K in keyof D]: D[K] extends CompositionDefinition<any>
-    ? ReactiveCompositionStore<ReturnType<D[K]['setup']>>
-    : D[K] extends OptionDefinition<infer S, infer G, infer A, infer D>
-    ? OptionStore<S, G, A, D>
-    : never
+export type StoreWithModules<B extends Builds> = {
+  [K in keyof B]: ReturnType<B[K]>
 }
 
 export type Watchers<S extends State> = {
@@ -128,20 +116,42 @@ export type WatchHandler<V = any, OV = any> = {
   handler: string | WatchCallback<V, OV>
 } & WatchOptions
 
-export function defineStore<T>(
-  name: Name,
+export function defineStore<T extends object>(
+  key: string,
   setup: CompositionSetup<T>
-): CompositionDefinition<T>
+): Build<CompositionStore<T>>
 
 export function defineStore<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
->(setup: OptionSetup<S, G, A, D>, never?: never): OptionDefinition<S, G, A, D>
+  B extends Builds
+>(setup: OptionSetup<S, G, A, B>, never?: never): Build<OptionStore<S, G, A, B>>
 
 export function defineStore(maybeSetup: any, setup: any): any {
-  return isString(maybeSetup)
-    ? { name: maybeSetup, setup }
-    : { name: maybeSetup.name, setup: maybeSetup }
+  const definition = isString(maybeSetup)
+    ? { key: maybeSetup, setup }
+    : { key: maybeSetup.key, setup: maybeSetup }
+
+  return (vuex?: Vuex | null) => {
+    const store = getAndSetVuex(vuex).setup(definition)
+
+    unSetVuex()
+
+    return store
+  }
+}
+
+function getAndSetVuex(vuex?: Vuex | null): Vuex {
+  vuex = vuex ?? (getCurrentInstance() && inject(key))
+
+  if (vuex) {
+    setActiveInstance(vuex)
+  }
+
+  return getActiveInstance()
+}
+
+function unSetVuex(): void {
+  setActiveInstance(null)
 }

@@ -13,28 +13,4 @@ describe('unit/vuex', () => {
 
     expect(counter1).toBe(counter2)
   })
-
-  it('can replace all states at once', () => {
-    const vuex = createVuex()
-
-    vuex.replaceAllStates({
-      storeA: { valueA: 1 },
-      storeB: { valueB: 2 }
-    })
-
-    expect(vuex.registries.storeA.initialState).toEqual({ valueA: 1 })
-    expect(vuex.registries.storeB.initialState).toEqual({ valueB: 2 })
-  })
-
-  it('can serialize an empty registries', () => {
-    expect(createVuex().serialize()).toEqual({})
-  })
-
-  it('can serialize a registry with only initial state being set', () => {
-    const vuex = createVuex()
-
-    vuex.replaceState('store', { value: 1 })
-
-    expect(vuex.serialize()).toEqual({})
-  })
 })

@@ -1,50 +1,55 @@
 import { App, reactive, InjectionKey } from 'vue'
 import { isFunction } from './utils'
-import * as Marshal from './marshal'
 import {
   Store,
-  Definitions,
   CompositionStore,
-  ReactiveCompositionStore,
   OptionStore,
+  Builds,
+  Build,
   CompositionDefinition,
   OptionDefinition,
   State,
   Getters,
   Actions
 } from './store'
-import {
-  setupCompositionStore,
-  setupOptionStore,
-  setupReactiveStore
-} from './setup'
+import { setupCompositionStore, setupOptionStore } from './setup'
 import { Plugin, installPlugins } from './plugin'
 
 export interface Vuex {
+  /**
+   * The registries that holds instantiated stores.
+   */
   registries: Registries
+
+  /**
+   * The plugins registered to the vuex instance.
+   */
   plugins: Plugins
-  install(app: App, vuex: Vuex): void
-  raw<T>(definition: CompositionDefinition<T>): CompositionStore<T>
-  raw<
-    S extends State,
-    G extends Getters,
-    A extends Actions,
-    D extends Definitions
+
+  /**
+   * Install vuex to the vue app instance.
+   */
+  install(app: App): void
+
+  /**
+   * Create or retrieve store instance from the registries.
+   */
+  store<T>(build: Build<T>): T
+
+  /**
+   * Get registered store for the given store definition, or create one and
+   * register it if it doesn't already exist.
+   */
+  setup<T>(definition: CompositionDefinition<T>): CompositionStore<T>
+
+  setup<
+    S extends State = {},
+    G extends Getters = {},
+    A extends Actions = {},
+    B extends Builds = {}
   >(
-    definition: OptionDefinition<S, G, A, D>
-  ): OptionStore<S, G, A, D>
-  store<T>(definition: CompositionDefinition<T>): ReactiveCompositionStore<T>
-  store<
-    S extends State,
-    G extends Getters,
-    A extends Actions,
-    D extends Definitions
-  >(
-    definition: OptionDefinition<S, G, A, D>
-  ): OptionStore<S, G, A, D>
-  replaceAllStates(states: Record<string, State>): void
-  replaceState(name: string, state: State): void
-  serialize(): Record<string, State>
+    definition: OptionDefinition<S, G, A, B>
+  ): OptionStore<S, G, A, B>
 }
 
 export interface Options {
@@ -52,17 +57,12 @@ export interface Options {
 }
 
 export interface Registries {
-  [name: string]: Registry
-}
-
-export interface Registry {
-  initialState: State | null
-  store?: Store
+  [name: string]: Store
 }
 
 export type Plugins = Record<string, any>
 
-export const vuexKey = ('vuex' as unknown) as InjectionKey<Vuex>
+export const key = ('vuex' as unknown) as InjectionKey<Vuex>
 
 export function createVuex(options: Options = {}): Vuex {
   const vuex = newVuex()
@@ -77,70 +77,33 @@ function newVuex(): Vuex {
   const plugins: Plugins = {}
 
   function install(app: App): void {
-    app.provide(vuexKey, vuex)
+    app.provide(key, vuex)
     app.config.globalProperties.$vuex = vuex
   }
 
-  /**
-   * Get a registered raw store from the registry by the given store
-   * definition. If the store doesn't exist in the registry yet, it will first
-   * create a store, then, register it to the registry so that it can be
-   * fetched back on the next call.
-   */
-  function raw<T>(definition: CompositionDefinition<T>): CompositionStore<T>
+  function store<T>(build: Build<T>): T {
+    return build(vuex)
+  }
 
-  function raw<
-    S extends State,
-    G extends Getters,
-    A extends Actions,
-    D extends Definitions
-  >(definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
+  function setup<T>(definition: CompositionDefinition<T>): CompositionStore<T>
 
-  function raw(definition: any): any {
+  function setup<
+    S extends State = {},
+    G extends Getters = {},
+    A extends Actions = {},
+    B extends Builds = {}
+  >(definition: OptionDefinition<S, G, A, B>): OptionStore<S, G, A, B>
+
+  function setup(definition: any): any {
     return getStore(vuex, definition) || createStore(vuex, definition)
-  }
-
-  /**
-   * Get a reactive version of the store, which provides users direct access to
-   * `ref` and `computed` in the composition store. It's particularly useful
-   * when consuming composition store inside option syntax Vue Component.
-   */
-  function store<T>(
-    definition: CompositionDefinition<T>
-  ): ReactiveCompositionStore<T>
-
-  function store<
-    S extends State,
-    G extends Getters,
-    A extends Actions,
-    D extends Definitions
-  >(definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
-
-  function store(definition: any): any {
-    return setupReactiveStore(raw(definition))
-  }
-
-  function replaceAllStates(states: Record<string, State>): void {
-    performReplaceAllStates(vuex, states)
-  }
-
-  function replaceState(name: string, state: State): void {
-    performReplaceState(vuex, name, state)
-  }
-
-  function serialize(): Record<string, State> {
-    return performSerialize(vuex)
   }
 
   const vuex = {
     registries,
     plugins,
     install,
-    raw,
     store,
-    replaceAllStates,
-    replaceState,
-    serialize
+    setup
   }
 
   return vuex
@@ -155,11 +118,11 @@ function getStore<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
->(vuex: Vuex, definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
+  B extends Builds
+>(vuex: Vuex, definition: OptionDefinition<S, G, A, B>): OptionStore<S, G, A, B>
 
 function getStore(vuex: any, definition: any): any {
-  return vuex.registries[definition.name]?.store ?? null
+  return vuex.registries[definition.key] ?? null
 }
 
 function createStore<T>(
@@ -171,73 +134,38 @@ function createStore<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
->(vuex: Vuex, definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
+  B extends Builds
+>(vuex: Vuex, definition: OptionDefinition<S, G, A, B>): OptionStore<S, G, A, B>
 
 function createStore(vuex: any, definition: any): void {
   // At first, register an empty store to the registry, then update the store
   // afterward. this is for cross-store composition.
-  const registry = reserveRegistry(vuex, definition) as any
+  const store = reserveStore(vuex, definition) as any
 
   isFunction(definition.setup)
-    ? setupCompositionStore(vuex, registry, definition)
-    : setupOptionStore(vuex, registry, definition)
+    ? setupCompositionStore(vuex, store, definition)
+    : setupOptionStore(vuex, store, definition)
 
-  return registry.store
+  return store
 }
 
-function reserveRegistry<T>(
+function reserveStore<T>(
   vuex: Vuex,
   definition: CompositionDefinition<T>
 ): CompositionStore<T>
 
-function reserveRegistry<
+function reserveStore<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
->(vuex: Vuex, definition: OptionDefinition<S, G, A, D>): OptionStore<S, G, A, D>
+  B extends Builds
+>(vuex: Vuex, definition: OptionDefinition<S, G, A, B>): OptionStore<S, G, A, B>
 
-function reserveRegistry(vuex: any, definition: any): any {
+function reserveStore(vuex: any, definition: any): any {
   const registries = vuex.registries
-  const { name, setup } = definition
+  const key = definition.key
 
-  if (!registries[name]) {
-    registries[name] = { initialState: null }
-  }
+  registries[key] = reactive({})
 
-  registries[name].store = isFunction(setup) ? {} : reactive({})
-
-  return registries[name]
-}
-
-function performReplaceAllStates(
-  vuex: Vuex,
-  states: Record<string, State>
-): void {
-  for (const name in states) {
-    performReplaceState(vuex, name, states[name])
-  }
-}
-
-function performReplaceState(vuex: Vuex, name: string, state: State): void {
-  vuex.registries[name] = {
-    initialState: state
-  }
-}
-
-function performSerialize(vuex: Vuex): State {
-  const state: State = {}
-
-  const registries = vuex.registries
-
-  for (const name in registries) {
-    const registry = registries[name]
-
-    if (registry && registry.store) {
-      state[name] = Marshal.serialize(registry.store)
-    }
-  }
-
-  return state
+  return registries[key]
 }

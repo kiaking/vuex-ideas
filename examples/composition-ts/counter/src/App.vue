@@ -1,8 +1,8 @@
 <template>
   <div class="container">
     <div class="states">
-      <p class="state">Count: {{ counter.count.value }}</p>
-      <p class="state">Double: {{ counter.double.value }}</p>
+      <p class="state">Count: {{ counter.count }}</p>
+      <p class="state">Double: {{ counter.double }}</p>
     </div>
     <div class="actions">
       <button class="action" @click="counter.increment">INCREMENT</button>
@@ -13,17 +13,17 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { useStore } from '/@vuex/'
-import Counter from './stores/Counter'
+import { mapStores } from '/@vuex/'
+import { useCounter } from './stores/Counter'
 
 export default defineComponent({
-  name: 'Counter',
+  computed: {
+    ...mapStores({
+      counter: useCounter
+    }),
 
-  setup() {
-    const counter = useStore(Counter)
-
-    return {
-      counter
+    triple(): number {
+      return this.counter.count * 3
     }
   }
 })

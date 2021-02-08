@@ -1,20 +1,11 @@
-import {
-  reactive,
-  isReactive,
-  computed,
-  watch,
-  WatchCallback,
-  WatchOptions
-} from 'vue'
+import { WatchCallback, WatchOptions, computed, watch } from 'vue'
 import { isString, isFunction, isArray } from './utils'
-import * as Marshal from './marshal'
-import { Vuex, Registry } from './vuex'
+import { Vuex } from './vuex'
 import {
-  Definitions,
   CompositionStore,
-  CompositionDefinition,
-  ReactiveCompositionStore,
   OptionStore,
+  Builds,
+  CompositionDefinition,
   OptionDefinition,
   State,
   Getters,
@@ -27,41 +18,32 @@ import {
 
 export function setupCompositionStore<T>(
   vuex: Vuex,
-  registry: Registry,
+  store: CompositionStore<T>,
   definition: CompositionDefinition<T>
 ): void {
-  const state = definition.setup({ use: vuex.raw, ...vuex.plugins })
+  console.log('CF', definition.key)
+  const state = definition.setup.bind(vuex)({ ...vuex.plugins })
 
-  Object.assign(registry.store, state)
-
-  hydrateRegistry(registry)
+  Object.assign(store, state)
 }
 
 export function setupOptionStore<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
+  B extends Builds
 >(
   vuex: Vuex,
-  registry: Registry,
-  definition: OptionDefinition<S, G, A, D>
+  store: OptionStore<S, G, A, B>,
+  definition: OptionDefinition<S, G, A, B>
 ): void {
-  const store = registry.store! as OptionStore<S, G, A, D>
+  const { setup } = definition
 
-  definition.setup.state && bindState(store, definition.setup.state)
-
-  // If an initial state is set to the registry, we'll hydrate the state here
-  // before binding any other properties such as getters and actions. This way,
-  // we can avoid any side effects from being performed, for example,
-  // watcher callbacks.
-  hydrateRegistry(registry)
-
-  definition.setup.getters && bindGetters(store, definition.setup.getters)
-  definition.setup.actions && bindActions(store, definition.setup.actions)
-  definition.setup.use && bindModules(vuex, store, definition.setup.use)
-  definition.setup.watch && setupWatchers(store, definition.setup.watch)
-
+  setup.state && bindState(store, setup.state)
+  setup.getters && bindGetters(store, setup.getters)
+  setup.actions && bindActions(store, setup.actions)
+  setup.use && bindModules(vuex, store, setup.use)
+  setup.watch && setupWatchers(store, setup.watch)
   bindPlugins(vuex, store)
 }
 
@@ -69,8 +51,8 @@ function bindState<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
->(store: OptionStore<S, G, A, D>, state: () => S): void {
+  B extends Builds
+>(store: OptionStore<S, G, A, B>, state: () => S): void {
   bindProperties(store, state(), (v) => v)
 }
 
@@ -78,8 +60,8 @@ function bindGetters<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
->(store: OptionStore<S, G, A, D>, getters: G): void {
+  B extends Builds
+>(store: OptionStore<S, G, A, B>, getters: G): void {
   bindProperties(store, getters, (getter) => {
     return (function () {
       const fn = getter
@@ -93,8 +75,8 @@ function bindActions<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
->(store: OptionStore<S, G, A, D>, actions: A): void {
+  B extends Builds
+>(store: OptionStore<S, G, A, B>, actions: A): void {
   bindProperties(store, actions, (action) => {
     return function () {
       const fn = action
@@ -108,21 +90,17 @@ function bindModules<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
->(
-  vuex: Vuex,
-  store: OptionStore<S, G, A, D>,
-  modules: () => Definitions
-): void {
-  bindProperties(store, modules(), (module) => vuex.store(module as any))
+  B extends Builds
+>(vuex: Vuex, store: OptionStore<S, G, A, B>, builds: () => Builds): void {
+  bindProperties(store, builds(), (build) => vuex.store(build as any))
 }
 
 function bindPlugins<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
->(vuex: Vuex, store: OptionStore<S, G, A, D>): void {
+  B extends Builds
+>(vuex: Vuex, store: OptionStore<S, G, A, B>): void {
   for (const name in vuex.plugins) {
     ;(store as any)[`$${name}`] = vuex.plugins[name]
   }
@@ -132,10 +110,10 @@ function bindProperties<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions,
+  B extends Builds,
   P extends Record<string, any>
 >(
-  store: OptionStore<S, G, A, D>,
+  store: OptionStore<S, G, A, B>,
   properties: P,
   fn: (value: { [K in keyof P]: P[K] }) => any
 ): void {
@@ -148,8 +126,8 @@ function setupWatchers<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
->(store: OptionStore<S, G, A, D>, watchers: Watchers<S>): void {
+  B extends Builds
+>(store: OptionStore<S, G, A, B>, watchers: Watchers<S>): void {
   for (const name in watchers) {
     setupWatcher(store, name, watchers[name])
   }
@@ -159,8 +137,8 @@ function setupWatcher<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
->(store: OptionStore<S, G, A, D>, name: string, watcher: Watcher): void {
+  B extends Builds
+>(store: OptionStore<S, G, A, B>, name: string, watcher: Watcher): void {
   if (isArray(watcher)) {
     return setupArrayWatcher(store, name, watcher)
   }
@@ -180,9 +158,9 @@ function setupStringWatcher<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
+  B extends Builds
 >(
-  store: OptionStore<S, G, A, D>,
+  store: OptionStore<S, G, A, B>,
   name: string,
   watcher: string,
   options: WatchOptions = {}
@@ -198,9 +176,9 @@ function setupFunctionWatcher<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
+  B extends Builds
 >(
-  store: OptionStore<S, G, A, D>,
+  store: OptionStore<S, G, A, B>,
   name: string,
   watcher: WatchCallback,
   options: WatchOptions = {}
@@ -212,8 +190,8 @@ function setupObjectWatcher<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
->(store: OptionStore<S, G, A, D>, name: string, watcher: WatchHandler): void {
+  B extends Builds
+>(store: OptionStore<S, G, A, B>, name: string, watcher: WatchHandler): void {
   const handler: string | WatchCallback = watcher.handler
 
   const options: WatchOptions = {
@@ -233,32 +211,7 @@ function setupArrayWatcher<
   S extends State,
   G extends Getters,
   A extends Actions,
-  D extends Definitions
->(store: OptionStore<S, G, A, D>, name: string, watcher: WatchItem[]): void {
+  B extends Builds
+>(store: OptionStore<S, G, A, B>, name: string, watcher: WatchItem[]): void {
   watcher.forEach((w) => setupWatcher(store, name, w))
-}
-
-export function setupReactiveStore<T>(
-  store: CompositionStore<T>
-): ReactiveCompositionStore<T>
-
-export function setupReactiveStore<
-  S extends State,
-  G extends Getters,
-  A extends Actions,
-  D extends Definitions
->(store: OptionStore<S, G, A, D>): OptionStore<S, G, A, D>
-
-export function setupReactiveStore(store: any): any {
-  return isReactive(store) ? store : reactive(store)
-}
-
-function hydrateRegistry(registry: Registry): void {
-  if (!registry.initialState) {
-    return
-  }
-
-  Marshal.hydrate(registry.store!, registry.initialState)
-
-  registry.initialState = null
 }
