@@ -6,38 +6,7 @@ describe('unit/store-options', () => {
     const vuex = createVuex()
 
     const counterStore = defineStore({
-      name: 'counter',
-      state: () => ({
-        count: 1
-      }),
-      getters: {
-        double() {
-          return this.count * 2
-        }
-      },
-      actions: {
-        increment() {
-          this.count++
-        }
-      }
-    })
-
-    const counter = vuex.raw(counterStore)
-
-    expect(counter.count).toBe(1)
-    expect(counter.double).toBe(2)
-
-    counter.increment()
-
-    expect(counter.count).toBe(2)
-    expect(counter.double).toBe(4)
-  })
-
-  it('gets reactive options store', () => {
-    const vuex = createVuex()
-
-    const counterStore = defineStore({
-      name: 'counter',
+      key: 'counter',
       state: () => ({
         count: 1
       }),
@@ -68,7 +37,38 @@ describe('unit/store-options', () => {
     const vuex = createVuex()
 
     const counterStore = defineStore({
-      name: 'counter',
+      key: 'counter',
+      state: () => ({
+        count: 1
+      }),
+      getters: {
+        double() {
+          return this.count * 2
+        }
+      },
+      actions: {
+        increment() {
+          this.count++
+        }
+      }
+    })
+
+    const counter = vuex.store(counterStore)
+
+    expect(counter.count).toBe(1)
+    expect(counter.double).toBe(2)
+
+    counter.increment()
+
+    expect(counter.count).toBe(2)
+    expect(counter.double).toBe(4)
+  })
+
+  it('gets reactive options store', () => {
+    const vuex = createVuex()
+
+    const counterStore = defineStore({
+      key: 'counter',
       state: () => ({
         count: 1
       }),
@@ -99,7 +99,7 @@ describe('unit/store-options', () => {
     const vuex = createVuex()
 
     const Counter = defineStore({
-      name: 'counter',
+      key: 'counter',
       state: () => ({
         count: 1
       }),
@@ -124,7 +124,7 @@ describe('unit/store-options', () => {
     const vuex = createVuex()
 
     const Counter = defineStore({
-      name: 'counter',
+      key: 'counter',
       state: () => ({
         count: 1
       }),
@@ -151,7 +151,7 @@ describe('unit/store-options', () => {
     const vuex = createVuex()
 
     const Counter = defineStore({
-      name: 'counter',
+      key: 'counter',
       state: () => ({
         nested: {
           value: 1
@@ -181,7 +181,7 @@ describe('unit/store-options', () => {
     const vuex = createVuex()
 
     const Counter = defineStore({
-      name: 'counter',
+      key: 'counter',
       state: () => ({
         count: 1
       }),
@@ -210,7 +210,7 @@ describe('unit/store-options', () => {
     const vuex = createVuex()
 
     const Counter = defineStore({
-      name: 'counter',
+      key: 'counter',
       state: () => ({
         count: 1
       }),
@@ -242,7 +242,7 @@ describe('unit/store-options', () => {
     })
 
     const counterStore = defineStore({
-      name: 'counter',
+      key: 'counter',
       use: () => ({
         greeter
       }),
@@ -253,7 +253,7 @@ describe('unit/store-options', () => {
       }
     })
 
-    const counter = vuex.raw(counterStore)
+    const counter = vuex.store(counterStore)
 
     expect(counter.countWithGreet).toBe('Hello 1')
   })

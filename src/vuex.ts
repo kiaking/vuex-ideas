@@ -62,7 +62,7 @@ export interface Registries {
 
 export type Plugins = Record<string, any>
 
-export const key = ('vuex' as unknown) as InjectionKey<Vuex>
+export const key = 'vuex' as unknown as InjectionKey<Vuex>
 
 export function createVuex(options: Options = {}): Vuex {
   const vuex = newVuex()

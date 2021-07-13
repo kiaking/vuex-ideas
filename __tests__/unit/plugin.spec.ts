@@ -1,12 +1,12 @@
-import { createVuex, defineStore, Vuex, Provide } from 'src/index'
+import { createVuex, defineStore, Plugin } from 'src/index'
 
 describe('unit/plugin', () => {
   it('can install plugin to the `context` for the composition store', () => {
-    function pluginA(_vuex: Vuex, provide: Provide): void {
+    const pluginA: Plugin = ({ provide }) => {
       provide('a', 'a')
     }
 
-    function pluginB(_vuex: Vuex, provide: Provide): void {
+    const pluginB: Plugin = ({ provide }) => {
       provide('b', (word: string) => `Hello, ${word}`)
     }
 
@@ -25,11 +25,11 @@ describe('unit/plugin', () => {
   })
 
   it('can install plugin to the `this` for the option store', () => {
-    function pluginA(_vuex: Vuex, provide: Provide): void {
+    const pluginA: Plugin = ({ provide }): void => {
       provide('a', 'a')
     }
 
-    function pluginB(_vuex: Vuex, provide: Provide): void {
+    const pluginB: Plugin = ({ provide }): void => {
       provide('b', (word: string) => `Hello, ${word}`)
     }
 
@@ -38,7 +38,7 @@ describe('unit/plugin', () => {
     })
 
     const store = defineStore({
-      name: 'store',
+      key: 'store',
       getters: {
         a(): string {
           return this.$a

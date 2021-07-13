@@ -13,15 +13,15 @@ describe('unit/store-compositions', () => {
       return { count, double, increment }
     })
 
-    const counter = vuex.raw(Counter)
+    const counter = vuex.store(Counter)
 
-    expect(counter.count.value).toBe(1)
-    expect(counter.double.value).toBe(2)
+    expect(counter.count).toBe(1)
+    expect(counter.double).toBe(2)
 
     counter.increment()
 
-    expect(counter.count.value).toBe(2)
-    expect(counter.double.value).toBe(4)
+    expect(counter.count).toBe(2)
+    expect(counter.double).toBe(4)
   })
 
   it('gets reactive composition store', () => {
@@ -70,43 +70,43 @@ describe('unit/store-compositions', () => {
   it('can use another composition store', () => {
     const vuex = createVuex()
 
-    const Greeter = defineStore('greeter', () => {
+    const useGreeter = defineStore('greeter', () => {
       const greet = ref('Hello')
 
       return { greet }
     })
 
-    const Counter = defineStore('counter', ({ use }) => {
-      const greeter = use(Greeter)
-      const countWithGreet = computed(() => `${greeter.greet.value} 1`)
-
-      return { countWithGreet }
-    })
-
-    const counter = vuex.raw(Counter)
-
-    expect(counter.countWithGreet.value).toBe('Hello 1')
-  })
-
-  it('can use another option store', () => {
-    const vuex = createVuex()
-
-    const Greeter = defineStore({
-      name: 'greeter',
-      state: () => ({
-        greet: 'Hello'
-      })
-    })
-
-    const Counter = defineStore('counter', ({ use }) => {
-      const greeter = use(Greeter)
+    const Counter = defineStore('counter', () => {
+      const greeter = useGreeter()
       const countWithGreet = computed(() => `${greeter.greet} 1`)
 
       return { countWithGreet }
     })
 
-    const counter = vuex.raw(Counter)
+    const counter = vuex.store(Counter)
 
-    expect(counter.countWithGreet.value).toBe('Hello 1')
+    expect(counter.countWithGreet).toBe('Hello 1')
+  })
+
+  it('can use another option store', () => {
+    const vuex = createVuex()
+
+    const useGreeter = defineStore({
+      key: 'greeter',
+      state: () => ({
+        greet: 'Hello'
+      })
+    })
+
+    const Counter = defineStore('counter', () => {
+      const greeter = useGreeter()
+      const countWithGreet = computed(() => `${greeter.greet} 1`)
+
+      return { countWithGreet }
+    })
+
+    const counter = vuex.store(Counter)
+
+    expect(counter.countWithGreet).toBe('Hello 1')
   })
 })

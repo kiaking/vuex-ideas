@@ -25,7 +25,13 @@ export type OptionStore<
   G extends Getters,
   A extends Actions,
   B extends Builds
-> = S & StoreWithGetters<G> & StoreWithActions<A> & StoreWithModules<B>
+> = S &
+  StoreWithGetters<G> &
+  StoreWithActions<A> &
+  StoreWithModules<B> &
+  StoreCustomProperties
+
+export interface StoreCustomProperties {}
 
 export type Builds = Record<string, Build>
 export type Build<T = any> = (vuex?: Vuex) => T
@@ -45,7 +51,7 @@ export interface CompositionDefinition<T> {
 
 export type CompositionSetup<T> = (context: CompositionContext) => T
 
-export interface CompositionContext {}
+export interface CompositionContext extends StoreCustomProperties {}
 
 export interface OptionDefinition<
   S extends State,
